@@ -1,9 +1,9 @@
-import { Controller, Post, Body, Get, Param } from '@nestjs/common';
+import { Controller, Post, Body, Get, Param, Delete } from '@nestjs/common';
 import { CreatePostDTO } from '../dto/CreatePostDTO';
 import { UserService } from '../services/user.service';
 import { User } from '../models/users/user.schema';
 
-@Controller('user')
+@Controller('users')
 export class UserController {
 
     constructor(private readonly userService: UserService) {}
@@ -23,6 +23,9 @@ export class UserController {
         return this.userService.findOne(id);
     }
 
-    
+    @Delete(':id')
+    async deleteOne(@Param('id') id: string) {
+        const deleted = this.userService.deleteOne(id);
+    }
 
 }
