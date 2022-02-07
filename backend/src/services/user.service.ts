@@ -3,7 +3,7 @@ import { InjectModel } from '@nestjs/mongoose';
 import { CreatePostDTO } from '../dto/CreatePostDTO';
 import { Model } from 'mongoose';
 import { User, UserDocument } from '../models/users/user.schema';
-import { verifyIdFormat } from '../utils/utils'
+import { IdParam } from '../validation/IdParam';
 
 @Injectable()
 export class UserService {
@@ -18,26 +18,18 @@ export class UserService {
         return this.userModel.find().exec();
     }
 
-    async findOne(id: string) {
-        if(verifyIdFormat(id)) {
-            const userFound = await this.userModel.findById(id).exec();
-            if(!userFound) {
-                return new NotFoundException();
-            } else {
-                return userFound;
-            }
+    async findOne(param: IdParam) {
+        const userFound = await this.userModel.findById(param.id).exec();
+        if(!userFound) {
+            return new NotFoundException();
         } else {
-            return new NotAcceptableException();
+            return userFound;
         }
     }
 
-    async deleteOne(id: string) {
-        if(verifyIdFormat(id)) {
-            let userDeleted = await this.userModel.deleteOne({ _id: id}).exec();
-            return userDeleted;
-        } else {
-            return new NotAcceptableException();
-        }
+    async deleteOne(param: IdParam) {
+        let userDeleted = await this.userModel.deleteOne({ _id: param.id}).exec();
+        return userDeleted;
     }
 
 }

@@ -2,6 +2,7 @@ import { Controller, Post, Body, Get, Param, Delete } from '@nestjs/common';
 import { CreatePostDTO } from '../dto/CreatePostDTO';
 import { UserService } from '../services/user.service';
 import { User } from '../models/users/user.schema';
+import { IdParam } from '../validation/IdParam';
 
 @Controller('users')
 export class UserController {
@@ -19,13 +20,13 @@ export class UserController {
     }
 
     @Get(':id')
-    async findOne(@Param('id') id: string) {
-        return this.userService.findOne(id);
+    async findOne(@Param() param: IdParam) {
+        return this.userService.findOne(param);
     }
 
     @Delete(':id')
-    async deleteOne(@Param('id') id: string) {
-        const deleted = this.userService.deleteOne(id);
+    async deleteOne(@Param() param: IdParam) {
+        const deleted = this.userService.deleteOne(param);
     }
 
 }
