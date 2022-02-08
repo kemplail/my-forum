@@ -11,8 +11,12 @@ export class Post {
     title: string;
     @Prop()
     date: Date;
-    @Prop({type: mongoose.Schema.Types.ObjectId, ref: 'Author'})
+    @Prop()
+    text: string;
+    @Prop({type: mongoose.Schema.Types.ObjectId, ref: 'User'})
     author: User;
+    @Prop({required: false})
+    lastUpdate: Date;
 }
 
 export const PostSchema = SchemaFactory.createForClass(Post);

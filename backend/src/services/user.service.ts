@@ -1,9 +1,9 @@
-import { Injectable, NotFoundException, NotAcceptableException } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
-import { CreateUserDto } from '../dto/CreatePostDTO';
+import { CreateUserDto } from '../dto/CreateUserDTO';
 import { Model } from 'mongoose';
 import { User, UserDocument } from '../models/users/user.schema';
-import { IdParam } from '../validation/IdParam';
+import { IdParam } from '../dto/IdParam';
 
 @Injectable()
 export class UserService {
