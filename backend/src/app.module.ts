@@ -3,6 +3,7 @@ import { AppController } from './app.controller';
 import { MongooseModule } from '@nestjs/mongoose';
 import { UserModule } from './user.module';
 import { PostsModule } from './posts.module';
+import { CommentsModule } from './comments.module';
 
 @Module({
   imports: [
@@ -11,6 +12,7 @@ import { PostsModule } from './posts.module';
     ),
     UserModule,
     PostsModule,
+    CommentsModule,
   ],
   controllers: [AppController],
   providers: [],
