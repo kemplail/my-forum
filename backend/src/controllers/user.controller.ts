@@ -1,5 +1,5 @@
-import { Controller, Post, Body, Get, Param, Delete } from '@nestjs/common';
-import { CreatePostDTO } from '../dto/CreatePostDTO';
+import { Controller, Post, Body, Get, Param, Delete, Patch } from '@nestjs/common';
+import { CreateUserDto } from '../dto/CreatePostDTO';
 import { UserService } from '../services/user.service';
 import { User } from '../models/users/user.schema';
 import { IdParam } from '../validation/IdParam';
@@ -10,7 +10,7 @@ export class UserController {
     constructor(private readonly userService: UserService) {}
 
     @Post()
-    async create(@Body() createPostDTO : CreatePostDTO): Promise<User> {
+    async create(@Body() createPostDTO : CreateUserDto): Promise<User> {
         return this.userService.create(createPostDTO);
     }
 
@@ -26,7 +26,12 @@ export class UserController {
 
     @Delete(':id')
     async deleteOne(@Param() param: IdParam) {
-        const deleted = this.userService.deleteOne(param);
+        return this.userService.deleteOne(param);
+    }
+
+    @Patch(':id')
+    update(@Param() param: IdParam, @Body() updateUserdto: CreateUserDto) {
+        return this.userService.update(param,updateUserdto);
     }
 
 }
