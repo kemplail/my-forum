@@ -52,4 +52,12 @@ export class UserService {
         }
     }
 
+    async findByUsername(username: string) {
+        const user = await this.userModel.findOne({username:username}).exec();
+        if(!user) {
+            throw new NotFoundException();
+        }
+        return user;
+    }
+
 }
