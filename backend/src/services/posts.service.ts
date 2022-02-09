@@ -42,4 +42,5 @@ export class PostsService {
   async getPostsOfAnUser(param: IdParam) {
     return this.postModel.find({author:param.id});
   }
+
 }

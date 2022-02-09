@@ -45,4 +45,8 @@ export class CommentsService {
         return this.commentModel.find({author:param.id}).populate('author').populate('post');
     }
 
+    async getNbCommentsOfAPost(param: IdParam) {
+       return this.commentModel.count({post:param.id});
+    }
+
 }

@@ -4,13 +4,21 @@ import { CreateUserDto } from '../dto/CreateUserDTO';
 import { Model } from 'mongoose';
 import { User, UserDocument } from '../models/users/user.schema';
 import { IdParam } from '../dto/IdParam';
+import * as bcrypt from 'bcrypt';
 
 @Injectable()
 export class UserService {
     constructor(@InjectModel(User.name) private userModel: Model<UserDocument>) {}
 
-    async create(createPostDTO: CreateUserDto): Promise<User>{
-        const createdUser = new this.userModel(createPostDTO);
+    async create(createUserDTO: CreateUserDto): Promise<User>{
+        
+        const saltOrRounds = 10;
+        const hash = await bcrypt.hash(createUserDTO.password, saltOrRounds);
+
+        const {password,...userWithoutPass} = createUserDTO;
+        const userToCreate = {password: hash, ...userWithoutPass};
+        const createdUser = new this.userModel(userToCreate);
+        
         return createdUser.save();
     }
 

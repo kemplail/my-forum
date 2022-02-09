@@ -39,6 +39,11 @@ export class CommentsController {
         return this.commentsService.findAllCommentsOfAPost(param);
     }
 
+    @Get('/post/nbComments/:id')
+    async getNbCommentsOfAPost(@Param() param: IdParam) {
+        return this.commentsService.getNbCommentsOfAPost(param);
+    }
+
     @Get('/user/:id')
     async findAllCommentsOfAnUser(@Param() param: IdParam) {
         return this.commentsService.findAllCommentsOfAnUser(param);
