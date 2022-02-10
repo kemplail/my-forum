@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Post } from './Post';
+import { PostElement } from './PostElement';
 import axios from 'axios';
 
 export function Posts(props) {
@@ -16,7 +16,7 @@ export function Posts(props) {
 
     function showPosts() {
         return posts?.map((element) => {
-            return <Post key={element._id} post={element} />
+            return <PostElement key={element._id} post={element} />
         })
     }
 
