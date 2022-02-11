@@ -34,7 +34,7 @@ export class CommentsService {
     }
 
     async update(updateCommentDTO : UpdateCommentDTO, param: IdParam) {
-        return this.commentModel.updateOne({_id: param.id},{$set: updateCommentDTO});
+        return this.commentModel.updateOne({_id: param.id},{$set: {...updateCommentDTO, lastUpdate: new Date()}});
     }
 
     async findAllCommentsOfAPost(param: IdParam) {

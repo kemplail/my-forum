@@ -15,6 +15,8 @@ export class Comment {
     post: Post;
     @Prop({type: mongoose.Schema.Types.ObjectId, ref: 'User'})
     author: User;
+    @Prop({required: false})
+    lastUpdate: Date;
 }
 
 export const CommentSchema = SchemaFactory.createForClass(Comment);

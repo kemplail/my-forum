@@ -1,11 +1,10 @@
 import React from 'react';
-import Login from './Login';
+import { Navbar } from '../navbar/Navbar';
 
 export function Header(props) {
     return (
-        <header>
-            <h1>My forum</h1>
-            <Login />
+        <header className='bg-slate-300'>
+            <Navbar />
         </header>
     )
 }
