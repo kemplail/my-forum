@@ -1,4 +1,5 @@
 import CommentElement from "./CommentElement";
+import { ChatAlt2Icon } from "@heroicons/react/solid";
 
 export default function CommentsList(props) {
 
@@ -14,7 +15,10 @@ export default function CommentsList(props) {
 
   return (
     <div className="comments-list">
-        <h2>Liste des commentaires ({props.comments.length })</h2>
+      <div className="flex space-x-2">
+        <ChatAlt2Icon className="h-5 w-5" />
+        <h2 className="text-1xl font-medium mb-4">Liste des commentaires ({props.comments.length })</h2>
+      </div>
         {showComments()}
     </div>
   );

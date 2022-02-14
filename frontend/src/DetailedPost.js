@@ -18,9 +18,8 @@ export function DetailedPost(props) {
     },[]);
 
     function showDetailedPost() {
-        return (<div>
+        return (<div className="bg-blue-200 p-6 rounded-md shadow">
             <PostDescription post={post} /> 
-            <hr/> 
             <Comments postid={id} />
             </div>);
     }

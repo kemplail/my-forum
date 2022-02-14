@@ -18,6 +18,7 @@ export class PostsService {
   async create(createPostDTO: CreatePostDTO): Promise<Post> {
     const newPost = new this.postModel(createPostDTO);
     newPost.date = new Date();
+    (await newPost.populate('author')).populate('post');
 
     return newPost.save();
   }

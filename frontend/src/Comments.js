@@ -22,9 +22,8 @@ export default function Comments(props) {
 
     function showComments() {
         return(
-            <div className='comments-childlist'>
+            <div className='comments-childlist bg-blue-100 p-4 shadow'>
                 <AddComment postid={props.postid} onAdd={addComment} />
-                <hr/>
                 <CommentsList comments={comments} />
             </div>
         );

@@ -13,6 +13,7 @@ export class CommentsService {
     async create(createCommentDTO : CreateCommentDTO): Promise<Comment> {
         const newComment = new this.commentModel(createCommentDTO);
         newComment.date = new Date();
+        (await newComment.populate("author")).populate("post");
 
         return newComment.save();
     }
