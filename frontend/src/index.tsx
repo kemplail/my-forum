@@ -1,16 +1,12 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
+import moment from 'moment';
+import { Provider } from 'react-redux';
+
+import store from './store';
 import App from './App';
 import reportWebVitals from './reportWebVitals';
-import moment from 'moment';
-
 import './index.css'
-
-import {
-  BrowserRouter,
-  Routes,
-  Route
-} from "react-router-dom";
 
 moment.locale('fr', {
   months: 'janvier_février_mars_avril_mai_juin_juillet_août_septembre_octobre_novembre_décembre'.split('_'),
@@ -75,7 +71,9 @@ moment.locale('fr', {
 
 ReactDOM.render(
   <React.StrictMode>
-    <App />
+    <Provider store={store}>
+      <App />
+    </Provider>
   </React.StrictMode>,
   document.getElementById('root')
 );

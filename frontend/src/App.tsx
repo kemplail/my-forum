@@ -9,8 +9,23 @@ import {
 import { Home } from './Home';
 import { DetailedPost } from './DetailedPost';
 import Container from './Container';
+import { getAllPosts } from './store/slices/post';
+//import { set } from './store/slices/post';
+import { useAppDispatch } from './hooks';
+import { useEffect } from 'react';
 
 function App() {
+
+  const dispatch = useAppDispatch();
+
+  async function getPosts() {
+    dispatch(getAllPosts());
+  }
+
+  useEffect(() => {
+    getPosts();
+  });
+
   return (
     <div className="App bg-slate-100 h-screen">
       <BrowserRouter>

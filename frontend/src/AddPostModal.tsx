@@ -1,23 +1,18 @@
 import { Dialog } from '@headlessui/react'
 import Title from './Title';
-import * as Yup from 'yup';
 import { useFormik } from 'formik';
 import axios from 'axios';
 import SubmitButton from "./SubmitButton";
 
+import { PostSchema } from './PostSchema';
+
 import { ExclamationCircleIcon } from "@heroicons/react/solid";
 import { CheckCircleIcon } from "@heroicons/react/solid";
 
-const PostSchema = Yup.object().shape({
-    content: Yup.string()
-      .min(30, 'Trop court!')
-      .required('Champs requis'),
-    title: Yup.string()
-      .min(5, 'Trop court!')
-      .required('Champs requis')
-});
+import { addAPost } from './store/slices/post';
+import { useAppDispatch } from './hooks';
 
-export default function AddPostModal(props) {
+export default function AddPostModal(props : any) {
 
     const formik = useFormik(
         {
@@ -31,10 +26,11 @@ export default function AddPostModal(props) {
         }
     );
 
+    const dispatch = useAppDispatch();
+
     async function handleOnSubmit() {
-        const { data } = await axios.post('http://localhost:5000/posts', {title:formik.values.title,text:formik.values.content,author:"6203c5a8242f0b39eeb4e45a"});
         formik.resetForm();
-        props.onAdd(data);
+        dispatch(addAPost({title:formik.values.title,text:formik.values.content,author:"6203c5a8242f0b39eeb4e45a"}));
         props.close();
     }
 
@@ -65,10 +61,10 @@ export default function AddPostModal(props) {
                             <label htmlFor="content">
                                     Contenu
                             </label> <br/>
-                            <textarea onChange={formik.handleChange} name="content" rows="10" cols="50" className="p-3 shadow-sm block w-full h-30 sm:text-sm border border-gray-300 rounded-md" />
+                            <textarea onChange={formik.handleChange} name="content" rows={10} cols={50} className="p-3 shadow-sm block w-full h-30 sm:text-sm border border-gray-300 rounded-md" />
                         </div>
                        </div>
-                       {formik.isValid && <SubmitButton />}
+                       {formik.isValid && <SubmitButton title="Ajouter" />}
                    </form>
                 </div>
             </div>

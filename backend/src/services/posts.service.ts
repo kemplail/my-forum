@@ -18,7 +18,7 @@ export class PostsService {
   async create(createPostDTO: CreatePostDTO): Promise<Post> {
     const newPost = new this.postModel(createPostDTO);
     newPost.date = new Date();
-    (await newPost.populate('author')).populate('post');
+    await newPost.populate('author');
 
     return newPost.save();
   }
@@ -32,12 +32,13 @@ export class PostsService {
     }
   }
 
-  deleteOne(param: IdParam) {
-    return this.postModel.deleteOne({ _id: param.id }).exec();
+  async deleteOne(param: IdParam) {
+    const response = await this.postModel.deleteOne({ _id: param.id }).exec();
+    return { _id:param.id, ...response };
   }
 
   async update(updatePostDTO: UpdatePostDTO, param: IdParam) {
-    return this.postModel.updateOne({ _id: param.id }, { $set: {...updatePostDTO, lastUpdate: new Date() }});
+    return this.postModel.findOneAndUpdate({ _id: param.id }, { $set: {...updatePostDTO, lastUpdate: new Date() }}, { new: true });
   }
 
   async getPostsOfAnUser(param: IdParam) {
