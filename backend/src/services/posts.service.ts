@@ -33,16 +33,15 @@ export class PostsService {
   }
 
   async deleteOne(param: IdParam) {
-    const response = await this.postModel.deleteOne({ _id: param.id }).exec();
-    return { _id:param.id, ...response };
+    return await this.postModel.findOneAndDelete({ _id: param.id }).exec();
   }
 
   async update(updatePostDTO: UpdatePostDTO, param: IdParam) {
-    return this.postModel.findOneAndUpdate({ _id: param.id }, { $set: {...updatePostDTO, lastUpdate: new Date() }}, { new: true });
+    return await this.postModel.findOneAndUpdate({ _id: param.id }, { $set: {...updatePostDTO, lastUpdate: new Date() }}, { new: true });
   }
 
   async getPostsOfAnUser(param: IdParam) {
-    return this.postModel.find({author:param.id});
+    return await this.postModel.find({author:param.id});
   }
 
 }

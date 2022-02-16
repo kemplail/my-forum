@@ -1,16 +1,23 @@
 import CommentElement from "./CommentElement";
 import { ChatAlt2Icon } from "@heroicons/react/solid";
+import { Comment } from "src/types/comment";
 
-export default function CommentsList(props) {
+interface CommentsList {
+  comments: Comment[]
+}
+
+export default function CommentsList(props : CommentsList) {
 
   function showComments() {
+
     if(props.comments.length > 0) {
-      return props.comments.map((element) => {
+      return props.comments.map((element : Comment) => {
         return <CommentElement key={element._id} comment={element} />
       })
     } else {
       return <p>Aucun commentaire trouvé</p>;
     }
+    
   }
 
   return (

@@ -1,5 +1,4 @@
-import { Posts } from './Posts';
-import { Navbar } from './navbar/Navbar';
+import { Posts } from './posts/Posts';
 import { Header } from './header/Header';
 import {
   BrowserRouter,
@@ -7,7 +6,7 @@ import {
   Route
 } from "react-router-dom";
 import { Home } from './Home';
-import { DetailedPost } from './DetailedPost';
+import { DetailedPost } from './posts/DetailedPost';
 import Container from './Container';
 import { getAllPosts } from './store/slices/post';
 //import { set } from './store/slices/post';

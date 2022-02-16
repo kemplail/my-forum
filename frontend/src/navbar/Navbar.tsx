@@ -1,8 +1,7 @@
-import React, { useEffect, useState } from 'react';
 import NavbarElement from './NavbarElement';
 import { Link } from 'react-router-dom';
 
-export function Navbar(props) {
+export function Navbar() {
     
     return (
         <div className="navbar flex bg-slate-200 border-solid border-2 border-gray-400">

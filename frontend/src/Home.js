@@ -1,7 +1,5 @@
-import React from 'react';
 import { Link } from 'react-router-dom';
-import Title from './Title';
-import AddPostModal from './AddPostModal';
+import Title from './textelements/Title';
 
 import { QuestionMarkCircleIcon } from '@heroicons/react/solid';
 
@@ -9,7 +7,7 @@ export function Home(props) {
 
     return(
         <div className='home p-4'>
-            <Title name="Bienvenue sur myForum !" />
+            <Title>Bienvenue sur myForum !</Title>
             <p className='flex'>
                 <QuestionMarkCircleIcon className='h-12 w-12'/>
                 <div className='ml-6'>
