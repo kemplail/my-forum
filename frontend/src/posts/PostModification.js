@@ -10,12 +10,7 @@ import { ErrorMessage } from "../validation/ErrorMessage";
 import { ValideMessage } from "../validation/ValideMessage";
 import { Post } from "src/types/post";
 
-interface PostModificationProps {
-    post: Post,
-    stopModify: VoidFunction
-}
-
-export function PostModification(props : PostModificationProps) {
+export function PostModification(props) {
     
     const [postTitle, setPostTitle] = useState(props.post.title);
     const [postContent, setPostContent] = useState(props.post.text);
