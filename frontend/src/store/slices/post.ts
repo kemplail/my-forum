@@ -1,8 +1,5 @@
 import { AsyncThunk, createAsyncThunk, createEntityAdapter, createSelector, createSlice, PayloadAction, ThunkAction } from '@reduxjs/toolkit'
-import { create } from 'yup/lib/Reference';
-import api from '../../services';
 import { Post } from '../../types/post';
-import { axiosBaseQuery } from '../axiosBaseQuery';
 import { getPosts, addPost, deletePost, updatePost, getPost } from 'src/services/post';
 import { RootState } from '..';
 

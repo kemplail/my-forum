@@ -12,6 +12,8 @@ import { getAllPosts } from './store/slices/post';
 //import { set } from './store/slices/post';
 import { useAppDispatch } from './hooks';
 import { useEffect } from 'react';
+import { Register } from './auth/Register';
+import { Login } from './auth/Login';
 
 function App() {
 
@@ -34,6 +36,8 @@ function App() {
           <Route path="/" element={<Home />} />
           <Route path="posts" element={<Posts />} />
           <Route path="post/:id" element={<DetailedPost />} />
+          <Route path="register" element={<Register />} />
+          <Route path="login" element={<Login/>} />
         </Routes>
       </Container>
       </BrowserRouter>

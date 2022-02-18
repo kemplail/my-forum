@@ -4,6 +4,8 @@ import { useState } from "react";
 import DeleteElementModal from "src/modals/DeleteElementModal";
 import { useDeleteCommentMutation } from "src/store/rtk/comments";
 import { Comment } from "src/types/comment";
+import { useAppSelector } from "src/hooks";
+import { useLoggedUserQuery } from "src/store/rtk/user";
 
 interface CommentDescriptionProps {
     comment: Comment,
@@ -15,6 +17,9 @@ export function CommentDescription(props: CommentDescriptionProps) {
     const [isDeleteOpen, setIsDeleteOpen] = useState(false);
 
     const [ deleteComment ] = useDeleteCommentMutation();
+
+    const accesstoken = useAppSelector((state) => state.user.access_token);
+    const { data, error } = useLoggedUserQuery(undefined,{skip: (accesstoken === '')});
 
     function handleDelete() {
         deleteComment(props.comment._id);
@@ -35,7 +40,14 @@ export function CommentDescription(props: CommentDescriptionProps) {
                 { props.comment.text }
             </div>
 
-            <div className="ml-auto flex space-x-2 col-span-2"><UpdateButton onClick={props.onModify} /><DeleteButton onClick={openModal} /></div>
+            { !error && data?._id == props.comment.author._id && 
+            
+                <div className="ml-auto flex space-x-2 col-span-2">
+                    <UpdateButton onClick={props.onModify} />
+                    <DeleteButton onClick={openModal} />
+                </div>
+
+            }
 
             <DeleteElementModal open={isDeleteOpen} close={closeModal} name={"Supprimer le commentaire"} deleteFunc={handleDelete} />
         </div>

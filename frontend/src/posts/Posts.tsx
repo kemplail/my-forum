@@ -6,11 +6,14 @@ import { Post } from '../types/post';
 import { useGetAllPostsQuery } from '../store/rtk/post';
 
 import { PlusSmIcon } from '@heroicons/react/solid';
+import { useAppSelector } from 'src/hooks';
 
 export function Posts(props: any) {
 
     const [isOpen, setIsOpen] = useState(false);
     const { data, isLoading, error } = useGetAllPostsQuery();
+
+    const accesstoken = useAppSelector((state) => state.user.access_token);
 
     function showPosts() {
         return data?.map((element: Post) => {
@@ -30,7 +33,9 @@ export function Posts(props: any) {
         <div className='posts '>
             <div className='flex'>
                 <Title>Fil des posts</Title>
-                <button onClick={openModal} className='ml-auto flex bg-blue-500 hover:bg-blue-700 text-white font-bold rounded h-10 p-2'><PlusSmIcon className='w-5 h-5'/>Ajouter un post</button>
+
+                { accesstoken && <button onClick={openModal} className='ml-auto flex bg-blue-500 hover:bg-blue-700 text-white font-bold rounded h-10 p-2'><PlusSmIcon className='w-5 h-5'/>Ajouter un post</button> }
+                
             </div>
             <div className='grid grid-cols-2 gap-2'>
                 {!isLoading ? showPosts() : <span>Loading...</span>}

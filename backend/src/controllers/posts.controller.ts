@@ -1,4 +1,5 @@
-import { Controller, Get, Body, Post, Param, Delete, Patch } from '@nestjs/common';
+import { Controller, Get, Body, Post, Param, Delete, Patch, UseGuards, Request } from '@nestjs/common';
+import { JwtAuthGuard } from 'src/auth/jwt-auth.guards';
 import { IdParam } from 'src/dto/IdParam';
 import { UpdatePostDTO } from 'src/dto/UpdatePostDTO';
 import { PostsService } from 'src/services/posts.service';
@@ -14,9 +15,10 @@ export class PostsController {
         return this.postsService.findAll();
     }
 
+    @UseGuards(JwtAuthGuard)
     @Post()
-    async create(@Body() createPostDTO: CreatePostDTO) {
-        return this.postsService.create(createPostDTO);
+    async create(@Request() req, @Body() createPostDTO: CreatePostDTO) {
+        return this.postsService.create(createPostDTO, req.user );
     }
 
     @Get(':id')
@@ -24,14 +26,16 @@ export class PostsController {
         return this.postsService.findOne(param);
     }
 
+    @UseGuards(JwtAuthGuard)
     @Delete(':id')
-    deleteOne(@Param() param: IdParam) {
-        return this.postsService.deleteOne(param);
+    deleteOne(@Request() req, @Param() param: IdParam) {
+        return this.postsService.deleteOne(param, req.user);
     }
 
+    @UseGuards(JwtAuthGuard)
     @Patch(':id')
-    async update(@Body() updatePostDTO : UpdatePostDTO, @Param() param: IdParam) {
-        return this.postsService.update(updatePostDTO, param);
+    async update(@Request() req, @Body() updatePostDTO : UpdatePostDTO, @Param() param: IdParam) {
+        return this.postsService.update(updatePostDTO, param, req.user);
     }
 
     @Get('/user/:id')

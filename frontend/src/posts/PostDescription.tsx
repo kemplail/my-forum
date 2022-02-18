@@ -5,11 +5,12 @@ import { useNavigate } from 'react-router-dom';
 
 import { useState } from "react";
 import { deleteAPost } from '../store/slices/post';
-import { useAppDispatch } from '../hooks';
+import { useAppDispatch, useAppSelector } from '../hooks';
 import { useDeletePostMutation } from '../store/rtk/post';
 import { UpdateButton } from '../formelements/UpdateButton';
 import { DeleteButton } from '../formelements/DeleteButton';
 import { DateElement } from 'src/textelements/DateElement';
+import { useLoggedUserQuery } from 'src/store/rtk/user';
 
 export default function PostDescription(props : any) {
 
@@ -18,6 +19,9 @@ export default function PostDescription(props : any) {
     const navigate = useNavigate();
 
     const [ deletePost ] = useDeletePostMutation();
+
+    const accesstoken = useAppSelector((state) => state.user.access_token);
+    const { data, error } = useLoggedUserQuery(undefined,{skip: (accesstoken === '')});
 
     function openModal() {
         setIsDeleteOpen(true);
@@ -43,10 +47,16 @@ export default function PostDescription(props : any) {
                     <DateElement>Crée {moment(props.post.date).fromNow()} par {props.post.author.username}</DateElement> <br/>
                     { props.post.lastUpdate && <DateElement>Modifié pour la dernière fois {moment(props.post.lastUpdate).fromNow()}</DateElement> }
                 </div>
-                <div className="ml-auto flex space-x-2">
-                    <UpdateButton onClick={props.onModify} />
-                    <DeleteButton onClick={openModal} />
-                </div>
+
+                { !error && data?._id === props.post.author._id && 
+                
+                    <div className="ml-auto flex space-x-2">
+                        <UpdateButton onClick={props.onModify} />
+                        <DeleteButton onClick={openModal} />
+                    </div>
+                
+                }
+
             </div>
 
             <div className="bg-slate-100 rounded p-4">

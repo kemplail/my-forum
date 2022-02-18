@@ -28,7 +28,7 @@ export default function AddComment(props: AddCommentProps) {
     const [ addComment ] = useAddCommentMutation();
 
     function handleOnSubmit() {
-        addComment({text:formik.values.commentValue,author:'6203c5a8242f0b39eeb4e45a',post:props.postid});
+        addComment({text:formik.values.commentValue,post:props.postid});
         formik.resetForm();
     }
 

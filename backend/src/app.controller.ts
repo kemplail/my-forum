@@ -19,4 +19,10 @@ export class AppController {
     return req.user;
   }
 
+  @UseGuards(JwtAuthGuard)
+  @Get('auth/loggedUser')
+  async loggedUser(@Request() req) {
+    return this.authService.loggedUser(req.user);
+  }
+
 }

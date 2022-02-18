@@ -29,7 +29,7 @@ export default function AddPostModal(props : any) {
 
     async function handleOnSubmit() {
         formik.resetForm();
-        addPost({title:formik.values.title,text:formik.values.content,author:"6203c5a8242f0b39eeb4e45a"});
+        addPost({title:formik.values.title,text:formik.values.content});
         props.close();
     }
 

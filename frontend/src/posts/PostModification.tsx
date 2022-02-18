@@ -4,13 +4,18 @@ import { PostSchema } from "../schemas/PostSchema";
 
 import { ExclamationCircleIcon } from "@heroicons/react/solid";
 import { CheckCircleIcon } from "@heroicons/react/solid";
-import { useState } from "react";
+import { ChangeEvent, useState } from "react";
 import { useUpdatePostMutation } from "../store/rtk/post";
 import { ErrorMessage } from "../validation/ErrorMessage";
 import { ValideMessage } from "../validation/ValideMessage";
 import { Post } from "src/types/post";
 
-export function PostModification(props) {
+interface PostModificationProps {
+    post: Post,
+    stopModify: VoidFunction
+}
+
+export function PostModification(props : PostModificationProps) {
     
     const [postTitle, setPostTitle] = useState(props.post.title);
     const [postContent, setPostContent] = useState(props.post.text);
@@ -29,12 +34,12 @@ export function PostModification(props) {
         }
     );
 
-    function handleTitleChange(event) {
+    function handleTitleChange(event : ChangeEvent<HTMLInputElement>) {
         setPostTitle(event.target.value);
         formik.handleChange(event);
     }
 
-    function handleContentChange(event) {
+    function handleContentChange(event : ChangeEvent<HTMLTextAreaElement>) {
         setPostContent(event.target.value);
         formik.handleChange(event);
     }

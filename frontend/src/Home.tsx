@@ -2,8 +2,13 @@ import { Link } from 'react-router-dom';
 import Title from './textelements/Title';
 
 import { QuestionMarkCircleIcon } from '@heroicons/react/solid';
+import { useAppSelector } from './hooks';
+import { LoggedDashboard } from './auth/LoggedDashboard';
+import { NotLoggedDashboard } from './auth/NotLoggedDashboard';
 
-export function Home(props) {
+export function Home() {
+
+    const accesstoken = useAppSelector((state) => state.user.access_token);
 
     return(
         <div className='home p-4'>
@@ -16,18 +21,13 @@ export function Home(props) {
                     Bonne visite !
                 </div>
             </p>
-            <div className=' grid grid-cols-2 bg-slate-200 rounded-md px-8 py-4 gap-12 ml-60 mr-60 shadow mt-6'>
-                <div className='bg-blue-300 p-4 rounded-md shadow hover:scale-110 hover:bg-blue-400'>
-                    <Link to="/posts">
-                        Consulter les derniers posts
-                    </Link>
-                </div>
-                <div className='bg-blue-300 p-4 rounded-md shadow hover:scale-110 hover:bg-blue-400'>
-                    <Link to=""> 
-                        Ajouter un nouveau post
-                    </Link>
-                </div>
-            </div>
+
+            {
+                accesstoken ?
+                <LoggedDashboard /> :
+                <NotLoggedDashboard />
+            }
+
         </div>
     )
 

@@ -8,7 +8,4 @@ export class CreatePostDTO {
     @ApiProperty()
     @IsString()
     text:string;
-    @ApiProperty()
-    @IsMongoId()
-    author: string;
 }

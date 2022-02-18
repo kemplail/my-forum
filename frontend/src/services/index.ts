@@ -7,11 +7,14 @@ const api: AxiosInstance = axios.create({
 
 api.interceptors.request.use(
     async (config) => {
-        // const state = store.getState()
-        // if (state.user.access_token !== '') {
-        //     const { access_token } = state.user
-        //     config.headers['Authorization'] = `Bearer ${access_token}`
-        // }
+         const state = store.getState()
+         if (state.user.access_token !== '') {
+             const { access_token } = state.user
+
+             if(config.headers) {
+                config.headers['Authorization'] = `Bearer ${access_token}`
+             }
+        }
         return config
     },
     (error) => {

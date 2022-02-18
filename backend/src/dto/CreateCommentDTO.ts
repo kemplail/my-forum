@@ -6,8 +6,5 @@ export class CreateCommentDTO {
     text: string;
     @ApiProperty()
     @IsMongoId()
-    author: string;
-    @ApiProperty()
-    @IsMongoId()
     post: string;
 }

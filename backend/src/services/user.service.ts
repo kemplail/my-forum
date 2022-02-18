@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { ConflictException, Injectable, NotFoundException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { CreateUserDto } from '../dto/CreateUserDTO';
 import { Model } from 'mongoose';
@@ -12,14 +12,29 @@ export class UserService {
 
     async create(createUserDTO: CreateUserDto): Promise<User>{
         
-        const saltOrRounds = 10;
-        const hash = await bcrypt.hash(createUserDTO.password, saltOrRounds);
+        try {
+            
+            await this.findByUsername(createUserDTO.username); 
 
-        const {password,...userWithoutPass} = createUserDTO;
-        const userToCreate = {password: hash, ...userWithoutPass};
-        const createdUser = new this.userModel(userToCreate);
-        
-        return createdUser.save();
+        } catch(e) {
+
+            if(e instanceof NotFoundException) {
+                
+                const saltOrRounds = 10;
+                const hash = await bcrypt.hash(createUserDTO.password, saltOrRounds);
+
+                const {password,...userWithoutPass} = createUserDTO;
+                const userToCreate = {password: hash, ...userWithoutPass};
+                const createdUser = new this.userModel(userToCreate);
+                
+                return createdUser.save();
+
+            }
+
+        }
+
+        throw new ConflictException();
+
     }
 
     async findAll(): Promise<User[]> {
@@ -28,6 +43,7 @@ export class UserService {
 
     async findOne(param: IdParam) {
         const userFound = await this.userModel.findById(param.id).exec();
+
         if(!userFound) {
             return new NotFoundException();
         } else {
@@ -62,6 +78,7 @@ export class UserService {
 
     async findByUsername(username: string) {
         const user = await this.userModel.findOne({username:username}).exec();
+
         if(!user) {
             throw new NotFoundException();
         }

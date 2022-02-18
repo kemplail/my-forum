@@ -10,8 +10,8 @@ import { IdParam } from 'src/dto/IdParam';
 export class CommentsService {
     constructor(@InjectModel(Comment.name) private commentModel: Model<CommentDocument>) {}
 
-    async create(createCommentDTO : CreateCommentDTO): Promise<Comment> {
-        const newComment = new this.commentModel(createCommentDTO);
+    async create(createCommentDTO : CreateCommentDTO, userid: IdParam): Promise<Comment> {
+        const newComment = new this.commentModel({ ...createCommentDTO, author: userid.id });
         newComment.date = new Date();
         (await newComment.populate("author")).populate("post");
 
@@ -30,12 +30,12 @@ export class CommentsService {
         return commentFound;
     }
 
-    async delete(param: IdParam) {
-        return this.commentModel.deleteOne({_id: param.id});
+    async delete(param: IdParam, userid : IdParam) {
+        return this.commentModel.deleteOne({_id: param.id, author: userid.id});
     }
 
-    async update(updateCommentDTO : UpdateCommentDTO, param: IdParam) {
-        return this.commentModel.updateOne({_id: param.id},{$set: {...updateCommentDTO, lastUpdate: new Date()}});
+    async update(updateCommentDTO : UpdateCommentDTO, param: IdParam, userId: IdParam) {
+        return this.commentModel.updateOne({_id: param.id, author: userId.id},{$set: {...updateCommentDTO, lastUpdate: new Date()}});
     }
 
     async findAllCommentsOfAPost(param: IdParam) {
