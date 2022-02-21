@@ -13,7 +13,6 @@ export class CommentsService {
     async create(createCommentDTO : CreateCommentDTO, userid: IdParam): Promise<Comment> {
         const newComment = new this.commentModel({ ...createCommentDTO, author: userid.id });
         newComment.date = new Date();
-        (await newComment.populate("author")).populate("post");
 
         return newComment.save();
     }
@@ -23,7 +22,7 @@ export class CommentsService {
     }
 
     async findOne(param: IdParam) {
-        let commentFound = await this.commentModel.findById(param.id).populate('author').populate('post');
+        let commentFound = await this.commentModel.findById(param.id).populate('author').populate('post').populate('likes');
         if (!commentFound) {
           return new NotFoundException();
         }
@@ -39,11 +38,11 @@ export class CommentsService {
     }
 
     async findAllCommentsOfAPost(param: IdParam) {
-        return this.commentModel.find({post:param.id}).populate('author').populate('post');
+        return this.commentModel.find({post:param.id}).populate('author').populate('post').populate('likes');
     }
 
     async findAllCommentsOfAnUser(param: IdParam) {
-        return this.commentModel.find({author:param.id}).populate('author').populate('post');
+        return this.commentModel.find({author:param.id}).populate('author').populate('post').populate('likes');
     }
 
     async getNbCommentsOfAPost(param: IdParam) {

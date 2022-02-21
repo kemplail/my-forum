@@ -1,3 +1,4 @@
+import { LikePost } from "./likePost";
 import { User } from "./user";
 
 export type Post = {
@@ -7,6 +8,7 @@ export type Post = {
     text: string,
     date: string,
     lastUpdate: Date,
-    author: User
+    author: User,
+    likes: LikePost[]
 
 }

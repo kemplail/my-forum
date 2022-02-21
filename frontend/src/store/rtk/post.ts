@@ -3,18 +3,20 @@ import { Post } from "src/types/post";
 import { axiosBaseQuery } from "../axiosBaseQuery";
 import { createApi } from '@reduxjs/toolkit/query/react'
 import { PostForm } from "src/types/postForm";
+import { LikePost } from "src/types/likePost";
+import { LikePostForm } from "src/types/likePostForm";
 
 export const postApi = createApi({
   reducerPath: 'postApi',
   baseQuery: axiosBaseQuery(),
-  tagTypes: ['Post'],
+  tagTypes: ['Post','LikePost'],
   endpoints: (builder) => ({
     getAllPosts: builder.query<Post[], void>({
       query: () => ({
         url: 'posts',
         method: 'GET'
       }),
-      providesTags: ["Post"]
+      providesTags: ["Post","LikePost"]
     }),
     addPost: builder.mutation<Post, PostForm>({
       query: (post) => ({
@@ -44,9 +46,33 @@ export const postApi = createApi({
         url: `posts/${id}`,
         method: 'GET'
       }),
-      providesTags: ["Post"]
+      providesTags: ["Post","LikePost"]
+    }),
+    addALike: builder.mutation<LikePost, LikePostForm>({
+      query: (like) => ({
+          url: 'likes/post',
+          method: 'POST',
+          data: like
+      }),
+      invalidatesTags: (result, error, arg) => [
+        { type: 'LikePost', post: arg.post }
+      ],
+    }),
+    getLikeOfUserOnPost: builder.query<LikePost, string>({
+      query: (id) => ({
+        url: `likes/post/loggeduser/${id}`,
+        method: "GET"
+      }),
+      providesTags: ["LikePost"]
+    }),
+    deleteLikeOfUserOnPost: builder.mutation<LikePost, string>({
+      query: (id) => ({
+        url: `likes/post/${id}`,
+        method: "DELETE"
+      }),
+      invalidatesTags: ["LikePost"]
     })
   }),
 })
 
-export const { useGetAllPostsQuery, useAddPostMutation, useUpdatePostMutation, useDeletePostMutation, useGetAPostQuery } = postApi
+export const { useGetAllPostsQuery, useAddPostMutation, useUpdatePostMutation, useDeletePostMutation, useGetAPostQuery, useAddALikeMutation, useGetLikeOfUserOnPostQuery, useDeleteLikeOfUserOnPostMutation } = postApi

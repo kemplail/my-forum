@@ -1,3 +1,4 @@
+import { LikeComment } from "./likeComment";
 import { Post } from "./post";
 import { User } from "./user";
 
@@ -7,5 +8,6 @@ export type Comment = {
     date: Date,
     post: Post,
     author: User,
-    lastUpdate?: Date
+    lastUpdate?: Date,
+    likes: LikeComment[]
 }

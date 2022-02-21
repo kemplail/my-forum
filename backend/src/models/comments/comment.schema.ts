@@ -5,7 +5,10 @@ import * as mongoose from 'mongoose';
 
 export type CommentDocument = Comment & Document;
 
-@Schema()
+@Schema({
+    toJSON: { virtuals: true }, 
+    toObject: { virtuals: true }
+})
 export class Comment {
     @Prop()
     text: string;
@@ -20,3 +23,9 @@ export class Comment {
 }
 
 export const CommentSchema = SchemaFactory.createForClass(Comment);
+
+CommentSchema.virtual('likes', {
+    ref:'LikeComment',
+    localField:'_id',
+    foreignField:'comment'
+})

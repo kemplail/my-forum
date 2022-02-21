@@ -11,7 +11,7 @@ export class PostsService {
   constructor(@InjectModel(Post.name) private postModel: Model<PostDocument>) {}
 
   async findAll() {
-    let posts = await this.postModel.find().populate('author');
+    let posts = await this.postModel.find().populate('author').populate('likes');
     return posts;
   }
 
@@ -19,13 +19,13 @@ export class PostsService {
     
     const newPost = new this.postModel({ ...createPostDTO, author:author.id });
     newPost.date = new Date();
-    await newPost.populate('author');
+    (await newPost.populate('author')).populate('likes');
 
     return newPost.save();
   }
 
   async findOne(param: IdParam) {
-    let postFound = await this.postModel.findById(param.id).populate('author');
+    let postFound = await this.postModel.findById(param.id).populate('author').populate('likes');
     if (!postFound) {
       return new NotFoundException();
     } else {

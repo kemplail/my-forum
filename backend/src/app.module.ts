@@ -5,6 +5,9 @@ import { UserModule } from './user.module';
 import { PostsModule } from './posts.module';
 import { CommentsModule } from './comments.module';
 import { AuthModule } from './auth/auth.module';
+import { LikesModule } from './likes.module';
+import { LikesController } from './controllers/likes.controller';
+import { LikesService } from './services/likes.service';
 
 @Module({
   imports: [
@@ -15,6 +18,7 @@ import { AuthModule } from './auth/auth.module';
     PostsModule,
     CommentsModule,
     AuthModule,
+    LikesModule,
   ],
   controllers: [AppController],
   providers: [],

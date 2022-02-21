@@ -10,7 +10,7 @@ const rootReducer = combineReducers({
     [PostSlice.name]: PostSlice.reducer,
     [postApi.reducerPath]: postApi.reducer,
     [commentApi.reducerPath]: commentApi.reducer,
-    [userApi.reducerPath]: userApi.reducer
+    [userApi.reducerPath]: userApi.reducer,
 })
 
 export default rootReducer

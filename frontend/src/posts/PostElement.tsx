@@ -37,6 +37,7 @@ export function PostElement(props: PostElementProps) {
             <p className='flex m-2'>
 
                 Nombre de commentaires : {!isLoading ? data && data.length : "Loading..." } <br/>
+                Nombre de likes : {props.post.likes.length}
 
                 <Link to={`/post/${props.post._id}`} className="flex ml-auto">
                     <span className='underline hover:font-bold hover:text-blue-700' >En savoir plus</span>
