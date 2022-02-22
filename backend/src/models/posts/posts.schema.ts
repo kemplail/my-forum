@@ -1,6 +1,6 @@
-import { Schema, Prop, SchemaFactory } from '@nestjs/mongoose';
+import { Schema, Prop, SchemaFactory, InjectModel, getModelToken } from '@nestjs/mongoose';
 import { Document } from 'mongoose';
-import { User, UserSchema } from '../users/user.schema';
+import { User } from '../users/user.schema';
 import * as mongoose from 'mongoose';
 
 export type PostDocument = Post & Document;
@@ -10,6 +10,7 @@ export type PostDocument = Post & Document;
     toObject: { virtuals: true }
 })
 export class Post {
+
     @Prop()
     title: string;
     @Prop()
@@ -25,15 +26,16 @@ export class Post {
 
 export const PostSchema = SchemaFactory.createForClass(Post);
 
+PostSchema.pre('remove', async function(next) {
+    try {
+        console.log("passe");
+    } catch(err) {
+        next(err);
+    }
+});
+
 PostSchema.virtual('likes', {
     ref:'LikePost',
     localField:'_id',
     foreignField:'post'
 })
-
-/*
-PostSchema.pre<Post>( "deleteOne", function (next) { 
-    console.log("lol");
-    next(); 
-} );
-*/

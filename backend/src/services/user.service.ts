@@ -1,9 +1,9 @@
 import { ConflictException, Injectable, NotFoundException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
-import { CreateUserDto } from '../dto/CreateUserDTO';
+import { CreateUserDto } from '../models/users/dto/CreateUserDTO';
 import { Model } from 'mongoose';
 import { User, UserDocument } from '../models/users/user.schema';
-import { IdParam } from '../dto/IdParam';
+import { IdParam } from '../models/IdParam';
 import * as bcrypt from 'bcrypt';
 
 @Injectable()
@@ -57,23 +57,12 @@ export class UserService {
     }
 
     async update(param: IdParam, updateUserDto : CreateUserDto) {
-        const userToUpdate = await this.userModel.findById(param.id).exec();
-        if(!userToUpdate) {
-            return new NotFoundException();
-        } else {
-            
-            if(updateUserDto.username) {
-                userToUpdate.username = updateUserDto.username;
-            }
-            if(updateUserDto.email) {
-                userToUpdate.email = updateUserDto.email;
-            }
-            if(updateUserDto.password) {
-                userToUpdate.password = updateUserDto.password;
-            }
 
-            return userToUpdate.save();
-        }
+        const saltOrRounds = 10;
+        const hash = await bcrypt.hash(updateUserDto.password, saltOrRounds);
+
+        return await this.userModel.findOneAndUpdate({ _id: updateUserDto.username, email: updateUserDto.email }, { $set: { username: updateUserDto.username, email: updateUserDto.email, password: hash }}, { new: true });
+
     }
 
     async findByUsername(username: string) {

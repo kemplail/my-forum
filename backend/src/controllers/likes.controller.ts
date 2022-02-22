@@ -1,9 +1,9 @@
 import { Body, Controller, Delete, Get, Param, Post, Request, UseGuards } from '@nestjs/common';
 import { request } from 'http';
 import { JwtAuthGuard } from 'src/auth/jwt-auth.guards';
-import { CreateLikeCommentDTO } from 'src/dto/CreateLikeCommentDTO';
-import { CreateLikePostDTO } from 'src/dto/CreateLikePostDTO';
-import { IdParam } from 'src/dto/IdParam';
+import { CreateLikeCommentDTO } from 'src/models/likes/dto/CreateLikeCommentDTO';
+import { CreateLikePostDTO } from 'src/models/likes/dto/CreateLikePostDTO';
+import { IdParam } from 'src/models/IdParam';
 import { LikesService } from 'src/services/likes.service';
 
 @Controller('likes')

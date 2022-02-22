@@ -1,4 +1,3 @@
-import { CreatePostDTO } from '../dto/CreatePostDTO';
 import { ApiProperty, OmitType, PartialType } from '@nestjs/swagger';
 import { IsString } from 'class-validator';
 

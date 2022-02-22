@@ -16,12 +16,17 @@ export function Login() {
     const acessToken = useAppSelector((state) => state.user.access_token);
     const status = useAppSelector((state) => state.user.status);
 
+    console.log(status);
+    console.log(acessToken);
+
     return(
         <div className="container max-w-md mx-auto flex-1 flex flex-col items-center justify-center px-2">
 
             <div className="bg-white px-6 py-8 rounded shadow text-black w-full border-2">
 
-                { !acessToken ? <LoginForm /> : status === "failed" ? <ErrorMessage>Erreur : Veuillez vérifier vos identifiants</ErrorMessage> : <ValideMessage>Vous êtes connecté !</ValideMessage> }
+                { !acessToken && <LoginForm /> } 
+                { status === "failed" && <ErrorMessage>Erreur : Veuillez vérifier vos identifiants</ErrorMessage> }
+                { status === "succeeded" && <ValideMessage>Vous êtes connecté !</ValideMessage>}
 
             </div>
 

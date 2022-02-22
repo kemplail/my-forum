@@ -1,8 +1,8 @@
 import { Controller, Get, Body, Post, Param, Delete, Patch, UseGuards, Request } from '@nestjs/common';
 import { CommentsService } from 'src/services/comments.service';
-import { CreateCommentDTO } from 'src/dto/CreateCommentDTO';
-import { IdParam } from 'src/dto/IdParam';
-import { UpdateCommentDTO } from 'src/dto/UpdateCommentDTO';
+import { CreateCommentDTO } from 'src/models/comments/dto/CreateCommentDTO';
+import { IdParam } from 'src/models/IdParam';
+import { UpdateCommentDTO } from 'src/models/comments/dto/UpdateCommentDTO'
 import { JwtAuthGuard } from 'src/auth/jwt-auth.guards';
 
 @Controller('comments')

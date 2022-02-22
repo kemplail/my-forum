@@ -2,7 +2,7 @@ import { Injectable, NotFoundException } from '@nestjs/common';
 import { UserService } from 'src/services/user.service';
 import { JwtService } from '@nestjs/jwt';
 import * as bcrypt from 'bcrypt';
-import { IdParam } from 'src/dto/IdParam';
+import { IdParam } from 'src/models/IdParam';
 
 @Injectable()
 export class AuthService {

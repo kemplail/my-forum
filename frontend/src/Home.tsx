@@ -5,6 +5,7 @@ import { QuestionMarkCircleIcon } from '@heroicons/react/solid';
 import { useAppSelector } from './hooks';
 import { LoggedDashboard } from './auth/LoggedDashboard';
 import { NotLoggedDashboard } from './auth/NotLoggedDashboard';
+import { useState } from 'react';
 
 export function Home() {
 

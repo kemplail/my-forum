@@ -14,6 +14,7 @@ import { useAppDispatch } from './hooks';
 import { useEffect } from 'react';
 import { Register } from './auth/Register';
 import { Login } from './auth/Login';
+import { NotFound } from './validation/NotFound';
 
 function App() {
 
@@ -38,6 +39,7 @@ function App() {
           <Route path="post/:id" element={<DetailedPost />} />
           <Route path="register" element={<Register />} />
           <Route path="login" element={<Login/>} />
+          <Route path="*" element={<NotFound />} />
         </Routes>
       </Container>
       </BrowserRouter>

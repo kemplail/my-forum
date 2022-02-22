@@ -1,10 +1,14 @@
 import NavbarElement from './NavbarElement';
 import { Link } from 'react-router-dom';
-import { useAppSelector } from 'src/hooks';
+import { useAppDispatch, useAppSelector } from 'src/hooks';
+import { clearState } from 'src/store/slices/user';
+import { DeconnexionButton } from './DeconnexionButton';
 
 export function Navbar() {
     
     const acessToken = useAppSelector((state) => state.user.access_token);
+
+    const dispatch = useAppDispatch();
 
     return (
         <div className="navbar flex bg-slate-200 border-solid border-2 border-gray-400">
@@ -26,6 +30,7 @@ export function Navbar() {
                 :
                 <ul className='flex ml-auto'>
                     <NavbarElement name="Mon espace" link="/" />
+                    <DeconnexionButton onClick={() => dispatch(clearState())} />
                 </ul>
             }
 

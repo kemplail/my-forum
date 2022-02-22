@@ -1,6 +1,11 @@
-import { Link } from "react-router-dom";
+import { useState } from "react";
+import { Link, useNavigate } from "react-router-dom";
+import AddPostModal from "src/modals/AddPostModal";
 
 export function LoggedDashboard() {
+    
+    const navigate = useNavigate();
+
     return(
         <div className=' grid grid-cols-2 bg-slate-200 rounded-md px-8 py-4 gap-12 ml-60 mr-60 shadow mt-6'>
             <div className='bg-blue-300 p-4 rounded-md shadow hover:scale-110 hover:bg-blue-400'>
@@ -9,7 +14,7 @@ export function LoggedDashboard() {
                 </Link>
             </div>
             <div className='bg-blue-300 p-4 rounded-md shadow hover:scale-110 hover:bg-blue-400'>
-                <Link to=""> 
+                <Link to="/posts" state={{fromDashBoard: true}}> 
                     Ajouter un nouveau post
                 </Link>
             </div>

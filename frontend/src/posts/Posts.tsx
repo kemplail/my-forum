@@ -10,6 +10,8 @@ import { useAppSelector } from 'src/hooks';
 
 export function Posts(props: any) {
 
+    console.log(props.location);
+
     const [isOpen, setIsOpen] = useState(false);
     const { data, isLoading, error } = useGetAllPostsQuery();
 

@@ -1,9 +1,9 @@
 import { Controller, Get, Body, Post, Param, Delete, Patch, UseGuards, Request } from '@nestjs/common';
 import { JwtAuthGuard } from 'src/auth/jwt-auth.guards';
-import { IdParam } from 'src/dto/IdParam';
-import { UpdatePostDTO } from 'src/dto/UpdatePostDTO';
+import { IdParam } from 'src/models/IdParam';
+import { UpdatePostDTO } from '../models/posts/dto/UpdatePostDTO';
 import { PostsService } from 'src/services/posts.service';
-import { CreatePostDTO } from '../dto/CreatePostDTO';
+import { CreatePostDTO } from '../models/posts/dto/CreatePostDTO';
 
 @Controller('posts')
 export class PostsController {

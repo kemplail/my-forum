@@ -1,9 +1,9 @@
 import { ConflictException, Injectable, Param } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
-import { CreateLikeCommentDTO } from 'src/dto/CreateLikeCommentDTO';
-import { CreateLikePostDTO } from 'src/dto/CreateLikePostDTO';
-import { IdParam } from 'src/dto/IdParam';
+import { CreateLikeCommentDTO } from 'src/models/likes/dto/CreateLikeCommentDTO';
+import { CreateLikePostDTO } from 'src/models/likes/dto/CreateLikePostDTO';
+import { IdParam } from 'src/models/IdParam';
 import { LikeComment } from 'src/models/likes/likecomment.schema';
 import { LikePost } from 'src/models/likes/likepost.schema';
 

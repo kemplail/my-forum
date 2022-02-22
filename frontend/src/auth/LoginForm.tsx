@@ -27,7 +27,7 @@ export function LoginForm() {
     }
    
     return (
-        <div>
+        <div className="mb-6">
 
             <div className="text-center">
                 <Title>Se connecter</Title>

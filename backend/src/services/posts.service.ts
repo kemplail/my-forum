@@ -1,14 +1,16 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
-import { CreatePostDTO } from '../dto/CreatePostDTO';
-import { UpdatePostDTO } from '../dto/UpdatePostDTO';
+import { CreatePostDTO } from '../models/posts/dto/CreatePostDTO';
+import { UpdatePostDTO } from '../models/posts/dto/UpdatePostDTO';
 import { Model } from 'mongoose';
 import { Post, PostDocument } from '../models/posts/posts.schema';
-import { IdParam } from '../dto/IdParam';
+import { IdParam } from '../models/IdParam';
+import { EventEmitter2 } from '@nestjs/event-emitter';
+import { PostDeletedEvent } from 'src/events/PostDeletedEvent';
 
 @Injectable()
 export class PostsService {
-  constructor(@InjectModel(Post.name) private postModel: Model<PostDocument>) {}
+  constructor(@InjectModel(Post.name) private postModel: Model<PostDocument>, private eventEmitter: EventEmitter2) {}
 
   async findAll() {
     let posts = await this.postModel.find().populate('author').populate('likes');
@@ -34,7 +36,15 @@ export class PostsService {
   }
 
   async deleteOne(param: IdParam, userid: IdParam) {
-    return await this.postModel.findOneAndDelete({ _id: param.id, author: userid.id }).exec();
+
+    const deletedPost = await this.postModel.findOneAndDelete({ _id: param.id, author: userid.id }).exec();
+
+    const postDeletedEvent = new PostDeletedEvent();
+    postDeletedEvent._id = deletedPost._id;
+    this.eventEmitter.emit('post.deleted', postDeletedEvent);
+
+    return deletedPost;
+    
   }
 
   async update(updatePostDTO: UpdatePostDTO, param: IdParam, userid: IdParam) {
