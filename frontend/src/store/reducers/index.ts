@@ -1,16 +1,25 @@
-import { combineReducers } from "@reduxjs/toolkit"
+import { AnyAction, combineReducers, CombinedState } from "@reduxjs/toolkit"
 import { commentApi } from "../rtk/comments"
+import { metricsApi } from "../rtk/metrics"
 import { postApi } from "../rtk/post"
 import { userApi } from "../rtk/user"
 import { PostSlice } from "../slices/post"
 import { userSlice } from '../slices/user'
 
-const rootReducer = combineReducers({
+const appReducer = combineReducers({
     [userSlice.name]: userSlice.reducer,
     [PostSlice.name]: PostSlice.reducer,
     [postApi.reducerPath]: postApi.reducer,
     [commentApi.reducerPath]: commentApi.reducer,
     [userApi.reducerPath]: userApi.reducer,
+    [metricsApi.reducerPath] : metricsApi.reducer
 })
+
+const rootReducer = (state : CombinedState<any>, action : AnyAction) => {
+    if (action.type === 'user/clearState') {
+        state = undefined
+    }
+    return appReducer(state, action);
+}
 
 export default rootReducer

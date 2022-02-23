@@ -4,5 +4,6 @@ import { User } from "./user";
 export type LikePost = {
     _id: string,
     post: Post,
-    user: User
+    user: User,
+    date: Date
 }

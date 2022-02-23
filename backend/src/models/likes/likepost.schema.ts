@@ -12,6 +12,8 @@ export class LikePost {
     user: User;
     @Prop({type: mongoose.Schema.Types.ObjectId, ref: 'Post'})
     post: Post;
+    @Prop()
+    date: Date;
 }
 
 export const LikePostSchema = SchemaFactory.createForClass(LikePost);

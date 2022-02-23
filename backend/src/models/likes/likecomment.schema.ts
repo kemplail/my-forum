@@ -12,6 +12,8 @@ export class LikeComment {
     user: User;
     @Prop({type: mongoose.Schema.Types.ObjectId, ref: 'Comment'})
     comment: Comment;
+    @Prop()
+    date: Date;
 }
 
 export const LikeCommentSchema = SchemaFactory.createForClass(LikeComment);

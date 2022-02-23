@@ -29,7 +29,7 @@ export function Navbar() {
                 </ul>
                 :
                 <ul className='flex ml-auto'>
-                    <NavbarElement name="Mon espace" link="/" />
+                    <NavbarElement name="Mon espace" link="/myspace" />
                     <DeconnexionButton onClick={() => dispatch(clearState())} />
                 </ul>
             }

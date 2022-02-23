@@ -15,6 +15,8 @@ import { useEffect } from 'react';
 import { Register } from './auth/Register';
 import { Login } from './auth/Login';
 import { NotFound } from './validation/NotFound';
+import { AccountDashboard } from './auth/AccountDashboard';
+import { Statistics } from './metrics/Statistics';
 
 function App() {
 
@@ -39,6 +41,8 @@ function App() {
           <Route path="post/:id" element={<DetailedPost />} />
           <Route path="register" element={<Register />} />
           <Route path="login" element={<Login/>} />
+          <Route path="myspace" element={<AccountDashboard />} />
+          <Route path="statistics" element={<Statistics />} />
           <Route path="*" element={<NotFound />} />
         </Routes>
       </Container>

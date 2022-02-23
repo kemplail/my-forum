@@ -35,9 +35,8 @@ export class LikesService {
 
         if(!searchedLike) {
 
-            const newLikePost = new this.likePostModel({ ...createLikePostDTO, user: userid.id });
-            (await newLikePost.populate('post')).populate('user');
-    
+            const newLikePost = new this.likePostModel({ ...createLikePostDTO, user: userid.id, date: new Date() });
+
             return newLikePost.save();
 
         }
@@ -53,6 +52,7 @@ export class LikesService {
         if(!searchedLike) {
 
             const newLikeComment = new this.likeCommentModel({ ...createLikeCommentDTO, user: userid.id });
+            newLikeComment.date = new Date();
             (await newLikeComment.populate('comment')).populate('user');
      
             return newLikeComment.save();

@@ -1,5 +1,6 @@
-import { Controller, Get, Request, UseGuards } from '@nestjs/common';
+import { Body, Controller, Get, Param, Post, Request, UseGuards } from '@nestjs/common';
 import { JwtAuthGuard } from 'src/auth/jwt-auth.guards';
+import { GetDatedDataDTO } from 'src/models/metrics/dto/GetDatedDataDTO';
 import { MetricsService } from 'src/services/metrics.service';
 
 @Controller('metrics')
@@ -9,20 +10,44 @@ export class MetricsController {
 
     @UseGuards(JwtAuthGuard)
     @Get('user/nbposts')
-    async getNbPostsUser(@Request() req) {
-        return this.metricsService.getNbPostsUser(req.user);
+    async getNbPostsUser(@Request() req, @Body() dateParam : GetDatedDataDTO) {
+        return this.metricsService.getNbPostsUser(req.user, dateParam);
     }
 
     @UseGuards(JwtAuthGuard)
-    @Get('user/nblikes')
-    async getNbLikesUser(@Request() req) {
-        return this.metricsService.getNbLikesUser(req.user);
+    @Get('user/nblikesreceivedposts')
+    async getNbLikesReceivedOnPostUser(@Request() req,  @Body() dateParam : GetDatedDataDTO) {
+        return this.metricsService.getNbLikesReceivedOnPostUser(req.user, dateParam);
     }
 
     @UseGuards(JwtAuthGuard)
-    @Get('user/nbpostssevendays')
-    async getNbPostsUserSinceSevenDays(@Request() req) {
-        return this.metricsService.getNbPostsUserSinceSevenDays(req.user);
+    @Get('user/nbcommentsreceived')
+    async getNbCommentsReceivedUser(@Request() req, @Body() dateParam : GetDatedDataDTO) {
+        return this.metricsService.getNbCommentsReceivedUser(req.user, dateParam);
+    }
+
+    @UseGuards(JwtAuthGuard)
+    @Get('user/nbcommentsposted')
+    async getNbCommentsPostedUser(@Request() req, @Body() dateParam: GetDatedDataDTO) {
+        return this.metricsService.getNbCommentsPostedUser(req.user, dateParam);
+    }
+
+    @UseGuards(JwtAuthGuard)
+    @Get('nbpostsperuser')
+    async getNbPostsPerUser() {
+        return this.metricsService.getNbPostsPerUser();
+    }
+
+    @UseGuards(JwtAuthGuard)
+    @Post('user/nbpostsevolution')
+    async getEvolutionNbPosts(@Request() req, @Body() dateParam : GetDatedDataDTO ) {
+        return this.metricsService.getEvolutionNbPosts(req.user, dateParam);
+    }
+
+    @UseGuards(JwtAuthGuard)
+    @Post('user/nblikesreceivedpostevolution')
+    async getEvolutionLikesReceivedOnPostUser(@Request() req, @Body() dateParam : GetDatedDataDTO) {
+        return this.metricsService.getEvolutionLikesReceivedOnPostUser(req.user, dateParam);
     }
 
 }
