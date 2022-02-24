@@ -2,6 +2,8 @@ import { axiosBaseQuery } from "../axiosBaseQuery";
 import { createApi } from '@reduxjs/toolkit/query/react'
 import { NbPostsEvolution } from "src/types/nbPostsEvolution";
 import { buildQueries } from "@testing-library/react";
+import { NbLikesEvolution } from "src/types/nbLikesEvolution";
+import { NbPostsPerUser } from "src/types/nbPostsPerUser";
 
 export const metricsApi = createApi({
   reducerPath: 'metricsApi',
@@ -44,7 +46,7 @@ export const metricsApi = createApi({
             data: {date:date}
           }),
           providesTags: ["LikePost"],
-          transformResponse: (defaultResponse : NbPostsEvolution[]) => {
+          transformResponse: (defaultResponse : NbLikesEvolution[]) => {
 
             let xAxis : (string)[] = [];
             let yAxis : (number)[] = [];
@@ -65,9 +67,37 @@ export const metricsApi = createApi({
             return response;
 
           }
-    })
+    }),
+    //getNbPostsPerUser
+    getNbPostsPerUser: builder.query<{data: [string, string|number][] }, void>({
+      query: () => ({
+          url: `metrics/nbpostsperuser`,
+          method: "POST",
+        }),
+        providesTags: ["Post"],
+        transformResponse: (defaultResponse : NbPostsPerUser[]) => {
+
+          let xAxis : (string)[] = [];
+          let yAxis : (number)[] = [];
+          let response : { data: [string, string|number][] } = { data: [["Username","Nombre de posts"]] };
+      
+          if(defaultResponse) {
+              xAxis = defaultResponse.map((element) => element.name);
+              yAxis = defaultResponse.map((element) => element.count);
+      
+              for(let i = 0; i < yAxis.length; i++) {
+                  response.data.push([xAxis[i],yAxis[i]]);
+              }
+
+          }
+
+          return response;
+
+        }
+  }),
+
   }),
   
 })
 
-export const { useGetEvolutionNbPostsQuery, useGetEvolutionNbLikesQuery } = metricsApi
+export const { useGetEvolutionNbPostsQuery, useGetEvolutionNbLikesQuery, useGetNbPostsPerUserQuery } = metricsApi

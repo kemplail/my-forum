@@ -33,7 +33,7 @@ export class MetricsController {
     }
 
     @UseGuards(JwtAuthGuard)
-    @Get('nbpostsperuser')
+    @Post('nbpostsperuser')
     async getNbPostsPerUser() {
         return this.metricsService.getNbPostsPerUser();
     }
