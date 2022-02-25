@@ -1,5 +1,6 @@
 import { AnyAction, combineReducers, CombinedState } from "@reduxjs/toolkit"
 import { commentApi } from "../rtk/comments"
+import { emptySplitApi } from "../rtk/emptySplitApi"
 import { metricsApi } from "../rtk/metrics"
 import { postApi } from "../rtk/post"
 import { userApi } from "../rtk/user"
@@ -9,10 +10,8 @@ import { userSlice } from '../slices/user'
 const appReducer = combineReducers({
     [userSlice.name]: userSlice.reducer,
     [PostSlice.name]: PostSlice.reducer,
-    [postApi.reducerPath]: postApi.reducer,
-    [commentApi.reducerPath]: commentApi.reducer,
     [userApi.reducerPath]: userApi.reducer,
-    [metricsApi.reducerPath] : metricsApi.reducer
+    [emptySplitApi.reducerPath] : emptySplitApi.reducer
 })
 
 const rootReducer = (state : CombinedState<any>, action : AnyAction) => {

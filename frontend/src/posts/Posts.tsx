@@ -7,10 +7,13 @@ import { useGetAllPostsQuery } from '../store/rtk/post';
 
 import { PlusSmIcon } from '@heroicons/react/solid';
 import { useAppSelector } from 'src/hooks';
+import { useLocation } from 'react-router-dom';
 
 export function Posts(props: any) {
 
-    const [isOpen, setIsOpen] = useState(false);
+    const locationData : {state: any} = useLocation();
+
+    const [isOpen, setIsOpen] = useState(locationData.state ? true : false);
     const { data, isLoading, error } = useGetAllPostsQuery();
 
     const accesstoken = useAppSelector((state) => state.user.access_token);

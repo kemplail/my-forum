@@ -9,25 +9,25 @@ export class MetricsController {
     constructor(private readonly metricsService: MetricsService) {}
 
     @UseGuards(JwtAuthGuard)
-    @Get('user/nbposts')
+    @Post('user/nbposts')
     async getNbPostsUser(@Request() req, @Body() dateParam : GetDatedDataDTO) {
         return this.metricsService.getNbPostsUser(req.user, dateParam);
     }
 
     @UseGuards(JwtAuthGuard)
-    @Get('user/nblikesreceivedposts')
+    @Post('user/nblikesreceivedposts')
     async getNbLikesReceivedOnPostUser(@Request() req,  @Body() dateParam : GetDatedDataDTO) {
         return this.metricsService.getNbLikesReceivedOnPostUser(req.user, dateParam);
     }
 
     @UseGuards(JwtAuthGuard)
-    @Get('user/nbcommentsreceived')
+    @Post('user/nbcommentsreceived')
     async getNbCommentsReceivedUser(@Request() req, @Body() dateParam : GetDatedDataDTO) {
         return this.metricsService.getNbCommentsReceivedUser(req.user, dateParam);
     }
 
     @UseGuards(JwtAuthGuard)
-    @Get('user/nbcommentsposted')
+    @Post('user/nbcommentsposted')
     async getNbCommentsPostedUser(@Request() req, @Body() dateParam: GetDatedDataDTO) {
         return this.metricsService.getNbCommentsPostedUser(req.user, dateParam);
     }

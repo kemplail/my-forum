@@ -1,15 +1,11 @@
-import { axiosBaseQuery } from "../axiosBaseQuery";
-import { createApi } from '@reduxjs/toolkit/query/react'
 import { Comment } from "src/types/comment";
 import { Post } from "src/types/post";
 import { commentForm } from "src/types/commentForm";
 import { LikeComment } from "src/types/likeComment";
 import { likeCommentForm } from "src/types/likeCommentForm";
+import { emptySplitApi } from "./emptySplitApi";
 
-export const commentApi = createApi({
-  reducerPath: 'commentApi',
-  baseQuery: axiosBaseQuery(),
-  tagTypes: ['Comment','LikeComment'],
+export const commentApi = emptySplitApi.injectEndpoints({
   endpoints: (builder) => ({
     getCommentsOfAPost: builder.query<Comment[], string>({
         query: (id) => ({
@@ -41,7 +37,7 @@ export const commentApi = createApi({
       }),
       invalidatesTags: ["Comment"]
     }),
-    addALike: builder.mutation<LikeComment, likeCommentForm>({
+    addALikeComment: builder.mutation<LikeComment, likeCommentForm>({
       query: (like) => ({
           url: 'likes/comment',
           method: 'POST',
@@ -66,6 +62,7 @@ export const commentApi = createApi({
       invalidatesTags: ["LikeComment"]
     })
   }),
+  overrideExisting: false
 })
 
-export const { useGetCommentsOfAPostQuery, useAddCommentMutation, useUpdateCommentMutation, useDeleteCommentMutation, useGetLikeOfUserOnCommentQuery, useDeleteLikeOfUserOnCommentMutation, useAddALikeMutation } = commentApi
+export const { useGetCommentsOfAPostQuery, useAddALikeCommentMutation, useAddCommentMutation, useDeleteCommentMutation, useDeleteLikeOfUserOnCommentMutation, useGetLikeOfUserOnCommentQuery, useUpdateCommentMutation } = commentApi

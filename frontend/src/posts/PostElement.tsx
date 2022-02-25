@@ -1,7 +1,7 @@
 import { Link } from "react-router-dom";
 import moment from 'moment';
 
-import { ArrowCircleRightIcon } from '@heroicons/react/solid'
+import { ArrowCircleRightIcon, ChatAlt2Icon, HeartIcon } from '@heroicons/react/solid'
 import { Post } from '../types/post';
 import { useGetCommentsOfAPostQuery } from '../store/rtk/comments';
 import { DateElement } from "../textelements/DateElement";
@@ -36,8 +36,10 @@ export function PostElement(props: PostElementProps) {
 
             <p className='flex m-2'>
 
-                Nombre de commentaires : {!isLoading ? data && data.length : "Loading..." } <br/>
-                Nombre de likes : {props.post.likes.length}
+                <div className="flex space-x-2">
+                    <ChatAlt2Icon className="h-8 w-8 text-blue-700" /> {!isLoading ? data && data.length : "Loading..." }
+                    <HeartIcon className="h-8 w-8 text-pink-500" /><span>{props.post.likes.length}</span>
+                </div>
 
                 <Link to={`/post/${props.post._id}`} className="flex ml-auto">
                     <span className='underline hover:font-bold hover:text-blue-700' >En savoir plus</span>

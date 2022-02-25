@@ -4,100 +4,129 @@ import { NbPostsEvolution } from "src/types/nbPostsEvolution";
 import { buildQueries } from "@testing-library/react";
 import { NbLikesEvolution } from "src/types/nbLikesEvolution";
 import { NbPostsPerUser } from "src/types/nbPostsPerUser";
+import { emptySplitApi } from "./emptySplitApi";
 
-export const metricsApi = createApi({
-  reducerPath: 'metricsApi',
-  baseQuery: axiosBaseQuery(),
-  tagTypes: ['Comment','Post','LikePost','LikeComment','User'],
+export const metricsApi = emptySplitApi.injectEndpoints({
   endpoints: (builder) => ({
-    getEvolutionNbPosts: builder.query<{data: [string, string|number][], countMax : number }, string>({
-        query: (date) => ({
-            url: `metrics/user/nbpostsevolution`,
-            method: "POST",
-            data: {date:date}
-          }),
-          providesTags: ["Post"],
-          transformResponse: (defaultResponse : NbPostsEvolution[]) => {
+    getEvolutionNbPosts: builder.query<{ data: [string, string | number][], countMax: number }, string>({
+      query: (date) => ({
+        url: `metrics/user/nbpostsevolution`,
+        method: "POST",
+        data: { date: date }
+      }),
+      providesTags: ["Post"],
+      transformResponse: (defaultResponse: NbPostsEvolution[]) => {
 
-            let xAxis : (string)[] = [];
-            let yAxis : (number)[] = [];
-            let response : { data: [string, string|number][], countMax : number } = { data: [["Date","Nombre de posts"]], countMax: 0 };
-        
-            if(defaultResponse) {
-                xAxis = defaultResponse.map((element) => `${element._id.day}-${element._id.month}-${element._id.year}`);
-                yAxis = defaultResponse.map((element) => element.count);
-        
-                for(let i = 0; i < yAxis.length; i++) {
-                    response.data.push([xAxis[i],yAxis[i]]);
-                }
+        let xAxis: (string)[] = [];
+        let yAxis: (number)[] = [];
+        let response: { data: [string, string | number][], countMax: number } = { data: [["Date", "Nombre de posts"]], countMax: 0 };
 
-                response.countMax = Math.max(...yAxis)+1;
+        if (defaultResponse) {
+          xAxis = defaultResponse.map((element) => `${element._id.day}-${element._id.month}-${element._id.year}`);
+          yAxis = defaultResponse.map((element) => element.count);
 
-            }
-
-            return response;
-
-          }
-    }),
-    getEvolutionNbLikes: builder.query<{data: [string, string|number][], countMax : number }, string>({
-        query: (date) => ({
-            url: `metrics/user/nblikesreceivedpostevolution`,
-            method: "POST",
-            data: {date:date}
-          }),
-          providesTags: ["LikePost"],
-          transformResponse: (defaultResponse : NbLikesEvolution[]) => {
-
-            let xAxis : (string)[] = [];
-            let yAxis : (number)[] = [];
-            let response : { data: [string, string|number][], countMax : number } = { data: [["Date","Nombre de likes"]], countMax: 0 };
-        
-            if(defaultResponse) {
-                xAxis = defaultResponse.map((element) => `${element._id.day}-${element._id.month}-${element._id.year}`);
-                yAxis = defaultResponse.map((element) => element.count);
-        
-                for(let i = 0; i < yAxis.length; i++) {
-                    response.data.push([xAxis[i],yAxis[i]]);
-                }
-
-                response.countMax = Math.max(...yAxis)+1;
-
-            }
-
-            return response;
-
-          }
-    }),
-    //getNbPostsPerUser
-    getNbPostsPerUser: builder.query<{data: [string, string|number][] }, void>({
-      query: () => ({
-          url: `metrics/nbpostsperuser`,
-          method: "POST",
-        }),
-        providesTags: ["Post"],
-        transformResponse: (defaultResponse : NbPostsPerUser[]) => {
-
-          let xAxis : (string)[] = [];
-          let yAxis : (number)[] = [];
-          let response : { data: [string, string|number][] } = { data: [["Username","Nombre de posts"]] };
-      
-          if(defaultResponse) {
-              xAxis = defaultResponse.map((element) => element.name);
-              yAxis = defaultResponse.map((element) => element.count);
-      
-              for(let i = 0; i < yAxis.length; i++) {
-                  response.data.push([xAxis[i],yAxis[i]]);
-              }
-
+          for (let i = 0; i < yAxis.length; i++) {
+            response.data.push([xAxis[i], yAxis[i]]);
           }
 
-          return response;
+          response.countMax = Math.max(...yAxis) + 1;
 
         }
+
+        return response;
+
+      }
+    }),
+    getEvolutionNbLikes: builder.query<{ data: [string, string | number][], countMax: number }, string>({
+      query: (date) => ({
+        url: `metrics/user/nblikesreceivedpostevolution`,
+        method: "POST",
+        data: { date: date }
+      }),
+      providesTags: ["LikePost"],
+      transformResponse: (defaultResponse: NbLikesEvolution[]) => {
+
+        let xAxis: (string)[] = [];
+        let yAxis: (number)[] = [];
+        let response: { data: [string, string | number][], countMax: number } = { data: [["Date", "Nombre de likes"]], countMax: 0 };
+
+        if (defaultResponse) {
+          xAxis = defaultResponse.map((element) => `${element._id.day}-${element._id.month}-${element._id.year}`);
+          yAxis = defaultResponse.map((element) => element.count);
+
+          for (let i = 0; i < yAxis.length; i++) {
+            response.data.push([xAxis[i], yAxis[i]]);
+          }
+
+          response.countMax = Math.max(...yAxis) + 1;
+
+        }
+
+        return response;
+
+      }
+    }),
+    //getNbPostsPerUser
+    getNbPostsPerUser: builder.query<{ data: [string, string | number][] }, void>({
+      query: () => ({
+        url: `metrics/nbpostsperuser`,
+        method: "POST",
+      }),
+      providesTags: ["Post"],
+      transformResponse: (defaultResponse: NbPostsPerUser[]) => {
+
+        let xAxis: (string)[] = [];
+        let yAxis: (number)[] = [];
+        let response: { data: [string, string | number][] } = { data: [["Username", "Nombre de posts"]] };
+
+        if (defaultResponse) {
+          xAxis = defaultResponse.map((element) => element.name);
+          yAxis = defaultResponse.map((element) => element.count);
+
+          for (let i = 0; i < yAxis.length; i++) {
+            response.data.push([xAxis[i], yAxis[i]]);
+          }
+
+        }
+
+        return response;
+
+      }
+    }),
+    getNbPosts: builder.query<number, string>({
+      query: (date) => ({
+        url: `metrics/user/nbposts`,
+        method: "POST",
+        data: { date: date }
+      }),
+      providesTags: ["Post"]
+    }),
+    getNbLikesOnPost: builder.query<number, string>({
+      query: (date) => ({
+        url: `metrics/user/nblikesreceivedposts`,
+        method: "POST",
+        data: { date: date }
+      }),
+      providesTags: ["Post", "LikePost"]
+    }),
+    getNbCommentsReceived: builder.query<number, string>({
+      query: (date) => ({
+        url: `metrics/user/nbcommentsreceived`,
+        method: "POST",
+        data: { date: date }
+      }),
+      providesTags: ["Post", "Comment"]
+    }),
+    getNbCommentsPosted: builder.query<number, string>({
+      query: (date) => ({
+        url: `metrics/user/nbcommentsposted`,
+        method: "POST",
+        data: { date: date }
+      }),
+      providesTags: ["Post", "Comment"]
+    })
   }),
 
-  }),
-  
 })
 
-export const { useGetEvolutionNbPostsQuery, useGetEvolutionNbLikesQuery, useGetNbPostsPerUserQuery } = metricsApi
+export const { useGetEvolutionNbPostsQuery, useGetEvolutionNbLikesQuery, useGetNbPostsPerUserQuery, useGetNbPostsQuery, useGetNbLikesOnPostQuery, useGetNbCommentsReceivedQuery, useGetNbCommentsPostedQuery } = metricsApi

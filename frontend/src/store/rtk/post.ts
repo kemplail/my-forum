@@ -5,11 +5,9 @@ import { createApi } from '@reduxjs/toolkit/query/react'
 import { PostForm } from "src/types/postForm";
 import { LikePost } from "src/types/likePost";
 import { LikePostForm } from "src/types/likePostForm";
+import { emptySplitApi } from "./emptySplitApi";
 
-export const postApi = createApi({
-  reducerPath: 'postApi',
-  baseQuery: axiosBaseQuery(),
-  tagTypes: ['Post','LikePost'],
+export const postApi = emptySplitApi.injectEndpoints({
   endpoints: (builder) => ({
     getAllPosts: builder.query<Post[], void>({
       query: () => ({
@@ -48,7 +46,7 @@ export const postApi = createApi({
       }),
       providesTags: ["Post","LikePost"]
     }),
-    addALike: builder.mutation<LikePost, LikePostForm>({
+    addALikePost: builder.mutation<LikePost, LikePostForm>({
       query: (like) => ({
           url: 'likes/post',
           method: 'POST',
@@ -75,4 +73,4 @@ export const postApi = createApi({
   }),
 })
 
-export const { useGetAllPostsQuery, useAddPostMutation, useUpdatePostMutation, useDeletePostMutation, useGetAPostQuery, useAddALikeMutation, useGetLikeOfUserOnPostQuery, useDeleteLikeOfUserOnPostMutation } = postApi
+export const { useGetAllPostsQuery, useAddPostMutation, useUpdatePostMutation, useDeletePostMutation, useGetAPostQuery, useAddALikePostMutation, useGetLikeOfUserOnPostQuery, useDeleteLikeOfUserOnPostMutation } = postApi

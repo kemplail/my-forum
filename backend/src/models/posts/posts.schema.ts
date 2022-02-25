@@ -26,14 +26,6 @@ export class Post {
 
 export const PostSchema = SchemaFactory.createForClass(Post);
 
-PostSchema.pre('remove', async function(next) {
-    try {
-        console.log("passe");
-    } catch(err) {
-        next(err);
-    }
-});
-
 PostSchema.virtual('likes', {
     ref:'LikePost',
     localField:'_id',

@@ -12,7 +12,7 @@ import { UpdateButton } from '../formelements/UpdateButton';
 import { DeleteButton } from '../formelements/DeleteButton';
 import { DateElement } from 'src/textelements/DateElement';
 import { useLoggedUserQuery } from 'src/store/rtk/user';
-import { useAddALikeMutation } from 'src/store/rtk/post';
+import { useAddALikePostMutation } from 'src/store/rtk/post';
 import { LikeButton } from 'src/formelements/LikeButton';
 
 export default function PostDescription(props : any) {
@@ -28,7 +28,7 @@ export default function PostDescription(props : any) {
     const { data, error } = useLoggedUserQuery(undefined,{skip: (accesstoken === '')});
     const { data:like, error:errorlike } = useGetLikeOfUserOnPostQuery(props.post._id,{skip: (accesstoken === '')});
     
-    const [ addLike ] = useAddALikeMutation();
+    const [ addLike ] = useAddALikePostMutation();
     const [ deleteLike ] = useDeleteLikeOfUserOnPostMutation();
 
     function openModal() {

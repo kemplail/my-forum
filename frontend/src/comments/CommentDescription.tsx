@@ -2,7 +2,7 @@ import { UpdateButton } from "../formelements/UpdateButton";
 import { DeleteButton } from "../formelements/DeleteButton";
 import { useState } from "react";
 import DeleteElementModal from "src/modals/DeleteElementModal";
-import { useAddALikeMutation, useDeleteCommentMutation, useDeleteLikeOfUserOnCommentMutation, useGetLikeOfUserOnCommentQuery } from "src/store/rtk/comments";
+import { useAddALikeCommentMutation, useDeleteCommentMutation, useDeleteLikeOfUserOnCommentMutation, useGetLikeOfUserOnCommentQuery } from "src/store/rtk/comments";
 import { Comment } from "src/types/comment";
 import { useAppSelector } from "src/hooks";
 import { useLoggedUserQuery } from "src/store/rtk/user";
@@ -24,7 +24,8 @@ export function CommentDescription(props: CommentDescriptionProps) {
 
     const accesstoken = useAppSelector((state) => state.user.access_token);
     const { data: like, error: errorlike } = useGetLikeOfUserOnCommentQuery(props.comment._id);
-    const [addLike] = useAddALikeMutation();
+    const [addLike] = useAddALikeCommentMutation();
+
     const [deleteLike] = useDeleteLikeOfUserOnCommentMutation();
     const { data, error } = useLoggedUserQuery(undefined, { skip: (accesstoken === '') });
 

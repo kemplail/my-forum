@@ -16,9 +16,6 @@ export function Login() {
     const acessToken = useAppSelector((state) => state.user.access_token);
     const status = useAppSelector((state) => state.user.status);
 
-    console.log(status);
-    console.log(acessToken);
-
     return(
         <div className="container max-w-md mx-auto flex-1 flex flex-col items-center justify-center px-2">
 

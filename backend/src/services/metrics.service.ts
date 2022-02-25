@@ -35,7 +35,11 @@ constructor(@InjectModel(Post.name) private postModel: Model<PostDocument>,
             { $count: "likes" }
         ]);
 
-        return result;
+        if(result == []) {
+            return 0;
+        }
+
+        return result[0].likes;
     }
 
     async getNbCommentsReceivedUser(userid : IdParam, dateParam : GetDatedDataDTO) {
@@ -53,7 +57,11 @@ constructor(@InjectModel(Post.name) private postModel: Model<PostDocument>,
             { $count: "comments" }
         ])
 
-        return result;
+        if(result == []) {
+            return 0;
+        }
+
+        return result[0].comments;
 
     }
 
@@ -65,7 +73,7 @@ constructor(@InjectModel(Post.name) private postModel: Model<PostDocument>,
 
     async getNbPostsPerUser() {
 
-        const result = await this.commentModel.aggregate([
+        const result = await this.postModel.aggregate([
             {$lookup: {
                 from: 'users',
                 localField: 'author',
