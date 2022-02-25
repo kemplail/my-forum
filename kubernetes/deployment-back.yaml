@@ -1,0 +1,19 @@
+apiVersion: "apps/v1"
+kind: Deployment
+metadata:
+  name: backend
+  labels:
+    app: backend
+spec:
+  selector:
+    matchLabels:
+      app: backend
+  template: 
+    metadata:
+      labels:
+        app: backend
+    spec:
+      containers:
+        - name: backend
+          imagePullPolicy: Never
+          image: my-forum-backend:latest
