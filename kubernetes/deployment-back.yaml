@@ -17,3 +17,5 @@ spec:
         - name: backend
           imagePullPolicy: Never
           image: my-forum-backend:latest
+          ports:
+            - containerPort: 5000

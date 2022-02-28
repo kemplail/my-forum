@@ -23,14 +23,15 @@ import { JwtStrategy } from './auth/jwt.strategy';
 import { UserController } from './controllers/user.controller';
 import { UserService } from './services/user.service';
 import { CommentDeletedListener } from './listeners/CommentDeletedListener';
-import { MetricsModule } from './metrics.module';
+import { ConfigModule } from '@nestjs/config';
 import { MetricsController } from './controllers/metrics.controller';
 import { MetricsService } from './services/metrics.service';
 
 @Module({
   imports: [
+    ConfigModule.forRoot(),
     MongooseModule.forRoot(
-      'mongodb+srv://kemplail:*WJ2sB@cluster0.rfu85.mongodb.net/my-forum?retryWrites=true&w=majority'
+      process.env.DATABASE_LINK
     ),
     EventEmitterModule.forRoot(),
     MongooseModule.forFeature([

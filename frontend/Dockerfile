@@ -3,6 +3,10 @@ WORKDIR /app
 COPY package*.json ./
 RUN npm install
 COPY . .
+
+ARG REACT_APP_API=http://192.168.49.2:31600
+ENV REACT_APP_API=$REACT_APP_API
+
 RUN npm run build
 
 FROM nginx:stable-alpine
