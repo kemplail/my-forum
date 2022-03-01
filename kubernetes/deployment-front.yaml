@@ -8,7 +8,7 @@ spec:
   selector:
     matchLabels:
       app: frontend
-  template: 
+  template:
     metadata:
       labels:
         app: frontend
@@ -17,3 +17,5 @@ spec:
         - name: frontend
           imagePullPolicy: Never
           image: my-forum-frontend:latest
+          ports:
+          - containerPort: 80

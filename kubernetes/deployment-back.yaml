@@ -8,7 +8,7 @@ spec:
   selector:
     matchLabels:
       app: backend
-  template: 
+  template:
     metadata:
       labels:
         app: backend
@@ -18,4 +18,4 @@ spec:
           imagePullPolicy: Never
           image: my-forum-backend:latest
           ports:
-            - containerPort: 5000
+          - containerPort: 5000

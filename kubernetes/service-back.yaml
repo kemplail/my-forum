@@ -3,11 +3,9 @@ kind: Service
 metadata:
   name: service-back
 spec:
-  type: NodePort
+  type: ClusterIP
   ports:
-    - nodePort: 31600
-      port: 5000
+    - port: 5000
       protocol: TCP
-      targetPort: 5000
   selector:
     app: backend

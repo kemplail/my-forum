@@ -4,7 +4,7 @@ COPY package*.json ./
 RUN npm install
 COPY . .
 
-ARG REACT_APP_API=http://192.168.49.2:31600
+ARG REACT_APP_API=/api
 ENV REACT_APP_API=$REACT_APP_API
 
 RUN npm run build
