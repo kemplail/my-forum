@@ -167,7 +167,7 @@ export function Statistics() {
             <div className="bg-white mt-2 flex justify-center items-center">
               <div className="w-1/2 p-4 space-y-8">
                 <h2 className="text-lg italic mt-4 mb-4 ml-4 text-center">Mon beau wordcloud</h2>
-               <ReactWordcloud options={{ fontSizes: [20, 100] }} words={wordCloud} />
+               <ReactWordcloud options={{ fontSizes: [20, 100], spiral: "archimedean", rotationAngles: [45,45], rotations: 1}} words={wordCloud} />
               </div>
             </div>
           }
