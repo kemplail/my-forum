@@ -50,4 +50,10 @@ export class MetricsController {
         return this.metricsService.getEvolutionLikesReceivedOnPostUser(req.user, dateParam);
     }
 
+    @UseGuards(JwtAuthGuard)
+    @Get('wordcloud')
+    async getWordsUsedInPosts() {
+        return this.metricsService.getWordsUsedInPosts();
+    }
+
 }

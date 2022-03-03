@@ -17,5 +17,18 @@ spec:
         - name: backend
           imagePullPolicy: Never
           image: my-forum-backend:latest
+          env: 
+            - name: SECRET_DB_LINK
+              valueFrom:
+                secretKeyRef:
+                  name: db-link
+                  key: link
+          # volumeMounts:
+          #   - name: secret-volume
+          #     mountPath: /etc/secret-volume
           ports:
           - containerPort: 5000
+      # volumes:
+      #   - name: secret-volume
+      #     secret:
+      #       secretName: db-link

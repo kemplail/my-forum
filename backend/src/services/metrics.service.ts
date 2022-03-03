@@ -1,6 +1,9 @@
+import { HttpService } from '@nestjs/axios';
 import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
+import { AxiosResponse } from 'axios';
 import { Date, Model } from 'mongoose';
+import { lastValueFrom, Observable } from 'rxjs';
 import { Comment, CommentDocument } from 'src/models/comments/comment.schema';
 import { IdParam } from 'src/models/IdParam';
 import { LikePost, LikePostDocument } from 'src/models/likes/likepost.schema';
@@ -14,7 +17,7 @@ export class MetricsService {
 
 constructor(@InjectModel(Post.name) private postModel: Model<PostDocument>, 
 @InjectModel(LikePost.name) private likePostModel : Model<LikePostDocument>,
-@InjectModel(Comment.name) private commentModel : Model<CommentDocument>) {}
+@InjectModel(Comment.name) private commentModel : Model<CommentDocument>, private httpService: HttpService) {}
 
     async getNbPostsUser(userid : IdParam, dateParam : GetDatedDataDTO) {
         return await this.postModel.count({author: userid.id, date: { $gte : new Date(dateParam.date).toISOString() }});
@@ -35,7 +38,7 @@ constructor(@InjectModel(Post.name) private postModel: Model<PostDocument>,
             { $count: "likes" }
         ]);
 
-        if(result == []) {
+        if(result.length == 0) {
             return 0;
         }
 
@@ -57,7 +60,7 @@ constructor(@InjectModel(Post.name) private postModel: Model<PostDocument>,
             { $count: "comments" }
         ])
 
-        if(result == []) {
+        if(result.length == 0) {
             return 0;
         }
 
@@ -149,8 +152,16 @@ constructor(@InjectModel(Post.name) private postModel: Model<PostDocument>,
             }},
         ]);
 
+        console.log(result);
+
         return result;
 
+    }
+
+    async getWordsUsedInPosts(): Promise<Record<string, number>> {
+
+        let response = await lastValueFrom(this.httpService.get('https://flask-api-my-forum-umqnlitcoa-ew.a.run.app/posts'));
+        return response.data;
     }
 
 }

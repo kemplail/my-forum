@@ -1,5 +1,5 @@
 import { ApiProperty } from "@nestjs/swagger";
-import { IsDate, IsDateString } from "class-validator";
+import { IsDateString } from "class-validator";
 
 export class GetDatedDataDTO {
     @ApiProperty()

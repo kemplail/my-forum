@@ -1,4 +1,5 @@
 import { Module } from '@nestjs/common';
+import { HttpModule } from '@nestjs/axios'
 import { AppController } from './app.controller';
 import { MongooseModule } from '@nestjs/mongoose';
 import { EventEmitterModule } from '@nestjs/event-emitter';
@@ -31,7 +32,7 @@ import { MetricsService } from './services/metrics.service';
   imports: [
     ConfigModule.forRoot(),
     MongooseModule.forRoot(
-      process.env.DATABASE_LINK
+      process.env.SECRET_DB_LINK
     ),
     EventEmitterModule.forRoot(),
     MongooseModule.forFeature([
@@ -46,6 +47,7 @@ import { MetricsService } from './services/metrics.service';
       secret: jwtConstants.secret,
       signOptions: { expiresIn: '100000s' },
     }),
+    HttpModule
   ],
   controllers: [AppController, CommentsController, LikesController, PostsController, UserController, MetricsController],
   providers: [CommentsService, LikesService, PostsService, PostDeletedListener, CommentDeletedListener, AuthService, LocalStrategy, JwtStrategy, UserService, MetricsService],

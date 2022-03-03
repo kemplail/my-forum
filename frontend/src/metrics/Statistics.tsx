@@ -1,9 +1,11 @@
 import { Navigate } from "react-router-dom";
 import { useAppSelector } from "src/hooks";
-import { useGetEvolutionNbLikesQuery, useGetEvolutionNbPostsQuery, useGetNbCommentsPostedQuery, useGetNbCommentsReceivedQuery, useGetNbLikesOnPostQuery, useGetNbPostsPerUserQuery, useGetNbPostsQuery } from "src/store/rtk/metrics";
+import { useGetEvolutionNbLikesQuery, useGetEvolutionNbPostsQuery, useGetNbCommentsPostedQuery, useGetNbCommentsReceivedQuery, useGetNbLikesOnPostQuery, useGetNbPostsPerUserQuery, useGetNbPostsQuery, useGetWordCloudQuery } from "src/store/rtk/metrics";
 import Title from "src/textelements/Title";
 import { Chart } from "react-google-charts";
 import moment from "moment";
+import { NoData } from "src/validation/NoData";
+import ReactWordcloud from "react-wordcloud";
 
 export function Statistics() {
 
@@ -21,6 +23,7 @@ export function Statistics() {
   const { data: nbCommentsReceivedSevenD, isLoading: isLoadingNbCommentsReceivedSevenD } = useGetNbCommentsReceivedQuery(dateSevenDays);
   const { data: nbCommentsReceivedAllTime, isLoading: isLoadingNbCommentsReceivedAllTime } = useGetNbCommentsReceivedQuery(dateAlltime);
   const { data: nbCommentsPostedAllTime, isLoading: isLoadingNbCommentsPostedAllTime } = useGetNbCommentsPostedQuery(dateAlltime);
+  const { data: wordCloud, isLoading: isLoadingWordCloud } = useGetWordCloudQuery();
 
   //Graph évolution du nombre de posts ces 7 derniers jours
 
@@ -101,15 +104,19 @@ export function Statistics() {
 
             {!isLoadingEvolutionNbPosts && evolutionNbPosts ?
 
-              <div>
-                <Chart
-                  chartType="LineChart"
-                  data={evolutionNbPosts.data}
-                  options={optionsEvolutionNbPosts}
-                  height="400px"
-                  legendToggle
-                />
-              </div>
+              evolutionNbPosts.data.length > 1 ?
+
+                <div>
+                  <Chart
+                    chartType="LineChart"
+                    data={evolutionNbPosts.data}
+                    options={optionsEvolutionNbPosts}
+                    height="400px"
+                    legendToggle
+                  />
+                </div>
+
+                : <NoData />
 
               : "Loading..."
 
@@ -136,15 +143,19 @@ export function Statistics() {
 
             {!isLoadingEvolutionNbLikes && evolutionNbLikes ?
 
-              <div>
-                <Chart
-                  chartType="LineChart"
-                  data={evolutionNbLikes.data}
-                  options={optionsEvolutionNbLikes}
-                  height="400px"
-                  legendToggle
-                />
-              </div>
+              evolutionNbLikes.data.length > 1 ?
+
+                <div>
+                  <Chart
+                    chartType="LineChart"
+                    data={evolutionNbLikes.data}
+                    options={optionsEvolutionNbLikes}
+                    height="400px"
+                    legendToggle
+                  />
+                </div>
+
+                : <NoData />
 
               : "Loading..."
 
@@ -152,16 +163,25 @@ export function Statistics() {
 
           </div>
 
+          {!isLoadingWordCloud && wordCloud &&
+            <div className="bg-white mt-2 flex justify-center items-center">
+              <div className="w-1/2 p-4 space-y-8">
+                <h2 className="text-lg italic mt-4 mb-4 ml-4 text-center">Mon beau wordcloud</h2>
+               <ReactWordcloud options={{ fontSizes: [20, 100] }} words={wordCloud} />
+              </div>
+            </div>
+          }
+
           <h2 className="text-lg italic mt-4 mb-4 ml-4">Mes Statistiques textuelles</h2>
 
           <div className="bg-slate-100 space-y-2 p-4">
 
-            <span className="block">Nombre de posts publiés : <span className="font-bold">{ !isLoadingNbPosts && nbPosts }</span> </span>
-            <span className="block">Nombre de commentaires publiés : <span className="font-bold">{ !isLoadingNbCommentsPostedAllTime && nbCommentsPostedAllTime }</span> </span>
-            <span className="block">Nombre de likes reçus (sur vos posts) depuis 7 jours : <span className="font-bold">{ !isLoadingNbLikesOnPostSevenD && nbLikesOnPostSevenD }</span></span>
-            <span className="block">Nombre de likes reçus au total : <span className="font-bold">{ !isLoadingNbLikesOnPostAllTime && nbLikesOnPostAllTime }</span></span>
-            <span className="block">Nombre de commentaires reçus depuis 7 jours : <span className="font-bold">{ !isLoadingNbCommentsReceivedSevenD && nbCommentsReceivedSevenD }</span></span>
-            <span className="block">Nombre de commentaires reçus au total : <span className="font-bold">{ !isLoadingNbCommentsReceivedAllTime && nbCommentsReceivedAllTime}</span></span>
+            <span className="block">Nombre de posts publiés : <span className="font-bold">{!isLoadingNbPosts && nbPosts}</span> </span>
+            <span className="block">Nombre de commentaires publiés : <span className="font-bold">{!isLoadingNbCommentsPostedAllTime && nbCommentsPostedAllTime}</span> </span>
+            <span className="block">Nombre de likes reçus (sur vos posts) depuis 7 jours : <span className="font-bold">{!isLoadingNbLikesOnPostSevenD && nbLikesOnPostSevenD}</span></span>
+            <span className="block">Nombre de likes reçus au total : <span className="font-bold">{!isLoadingNbLikesOnPostAllTime && nbLikesOnPostAllTime}</span></span>
+            <span className="block">Nombre de commentaires reçus depuis 7 jours : <span className="font-bold">{!isLoadingNbCommentsReceivedSevenD && nbCommentsReceivedSevenD}</span></span>
+            <span className="block">Nombre de commentaires reçus au total : <span className="font-bold">{!isLoadingNbCommentsReceivedAllTime && nbCommentsReceivedAllTime}</span></span>
 
           </div>
 

@@ -5,6 +5,7 @@ import { buildQueries } from "@testing-library/react";
 import { NbLikesEvolution } from "src/types/nbLikesEvolution";
 import { NbPostsPerUser } from "src/types/nbPostsPerUser";
 import { emptySplitApi } from "./emptySplitApi";
+import { Word } from "react-wordcloud";
 
 export const metricsApi = emptySplitApi.injectEndpoints({
   endpoints: (builder) => ({
@@ -61,6 +62,8 @@ export const metricsApi = emptySplitApi.injectEndpoints({
           response.countMax = Math.max(...yAxis) + 1;
 
         }
+
+        console.log(response);
 
         return response;
 
@@ -124,9 +127,22 @@ export const metricsApi = emptySplitApi.injectEndpoints({
         data: { date: date }
       }),
       providesTags: ["Post", "Comment"]
-    })
+    }),
+    getWordCloud: builder.query<Word[], void>({
+      query: () => ({
+        url: 'metrics/wordcloud',
+        method: 'GET',
+      }),
+      providesTags: ["Post"],
+      transformResponse: (defaultResponse: Record<string, number>) => {
+
+        let newResponse = Object.keys(defaultResponse).map((key) => ({ text: key, value: defaultResponse[key]*100 }));
+        return newResponse;
+
+      }
+    }),
   }),
 
 })
 
-export const { useGetEvolutionNbPostsQuery, useGetEvolutionNbLikesQuery, useGetNbPostsPerUserQuery, useGetNbPostsQuery, useGetNbLikesOnPostQuery, useGetNbCommentsReceivedQuery, useGetNbCommentsPostedQuery } = metricsApi
+export const { useGetEvolutionNbPostsQuery, useGetEvolutionNbLikesQuery, useGetNbPostsPerUserQuery, useGetNbPostsQuery, useGetNbLikesOnPostQuery, useGetNbCommentsReceivedQuery, useGetNbCommentsPostedQuery, useGetWordCloudQuery } = metricsApi
