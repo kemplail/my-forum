@@ -8,61 +8,69 @@ import { emptySplitApi } from "./emptySplitApi";
 export const commentApi = emptySplitApi.injectEndpoints({
   endpoints: (builder) => ({
     getCommentsOfAPost: builder.query<Comment[], string>({
-        query: (id) => ({
-            url: `comments/post/${id}`,
-            method: "GET",
-        }),
-        providesTags: ["Comment",'LikeComment']
-    }),
-    addComment: builder.mutation<Comment, commentForm> ({
-      query: (comment) => ({
-        url:'comments',
-        method:"POST",
-        data: comment
+      query: (id) => ({
+        url: `comments/post/${id}`,
+        method: "GET",
       }),
-      invalidatesTags: ["Comment"]
+      providesTags: ["Comment", "LikeComment"],
     }),
-    updateComment: builder.mutation<Comment, Comment> ({
+    addComment: builder.mutation<Comment, commentForm>({
+      query: (comment) => ({
+        url: "comments",
+        method: "POST",
+        data: comment,
+      }),
+      invalidatesTags: ["Comment"],
+    }),
+    updateComment: builder.mutation<Comment, Comment>({
       query: (comment) => ({
         url: `comments/${comment._id}`,
         method: "PATCH",
-        data: comment
+        data: comment,
       }),
-      invalidatesTags: ["Comment"]
+      invalidatesTags: ["Comment"],
     }),
-    deleteComment: builder.mutation<Post, string> ({
+    deleteComment: builder.mutation<Post, string>({
       query: (id) => ({
         url: `comments/${id}`,
-        method: "DELETE"
+        method: "DELETE",
       }),
-      invalidatesTags: ["Comment"]
+      invalidatesTags: ["Comment"],
     }),
     addALikeComment: builder.mutation<LikeComment, likeCommentForm>({
       query: (like) => ({
-          url: 'likes/comment',
-          method: 'POST',
-          data: like
+        url: "likes/comment",
+        method: "POST",
+        data: like,
       }),
       invalidatesTags: (result, error, arg) => [
-        { type: 'LikeComment', post: arg.comment }
+        { type: "LikeComment", post: arg.comment },
       ],
     }),
     getLikeOfUserOnComment: builder.query<LikeComment, string>({
       query: (id) => ({
         url: `likes/comment/loggeduser/${id}`,
-        method: "GET"
+        method: "GET",
       }),
-      providesTags: ["LikeComment"]
+      providesTags: ["LikeComment"],
     }),
     deleteLikeOfUserOnComment: builder.mutation<LikeComment, string>({
       query: (id) => ({
         url: `likes/comment/${id}`,
-        method: "DELETE"
+        method: "DELETE",
       }),
-      invalidatesTags: ["LikeComment"]
-    })
+      invalidatesTags: ["LikeComment"],
+    }),
   }),
-  overrideExisting: false
-})
+  overrideExisting: false,
+});
 
-export const { useGetCommentsOfAPostQuery, useAddALikeCommentMutation, useAddCommentMutation, useDeleteCommentMutation, useDeleteLikeOfUserOnCommentMutation, useGetLikeOfUserOnCommentQuery, useUpdateCommentMutation } = commentApi
+export const {
+  useGetCommentsOfAPostQuery,
+  useAddALikeCommentMutation,
+  useAddCommentMutation,
+  useDeleteCommentMutation,
+  useDeleteLikeOfUserOnCommentMutation,
+  useGetLikeOfUserOnCommentQuery,
+  useUpdateCommentMutation,
+} = commentApi;

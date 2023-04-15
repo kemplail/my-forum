@@ -16,6 +16,20 @@ spec:
                 name: service-back
                 port:
                   number: 5000
+          - path: /grafana/?(.*)
+            pathType: Prefix
+            backend:
+              service:
+                name: foo-grafana
+                port:
+                  number: 80
+          - path: /prometheus/?(.*)
+            pathType: Prefix
+            backend:
+              service:
+                name: foo-kube-prometheus-stack-prometheus
+                port:
+                  number: 9090
           - path: /?(.*)
             pathType: Prefix
             backend:

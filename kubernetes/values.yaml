@@ -1,0 +1,33 @@
+
+## Using default values from https://github.com/grafana/helm-charts/blob/main/charts/grafana/values.yaml
+##
+grafana:
+  enabled: true
+  deploymentStrategy:
+    type: Recreate
+  persistence:
+    type: pvc
+    enabled: true
+    storageClassName: ""
+    accessModes:
+      - ReadWriteOnce
+    size: 10Gi
+    finalizers:
+      - kubernetes.io/pvc-protection
+    selectorLabels:
+      purpose: grafana
+  env:
+    GF_SERVER_ROOT_URL: http://192.168.49.2/grafana
+    GF_SERVER_SERVE_FROM_SUB_PATH: 'true'
+  ingress:
+    enabled: true
+    hosts:
+    - ""
+    path: /grafana($|(/.*))
+    pathType: ImplementationSpecific
+  sidecar:
+    dashboards:
+      enabled: false
+      label: grafana_dashboard
+      provider:
+        allowUiUpdates: true
