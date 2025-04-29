@@ -15,11 +15,19 @@ export class PostsService {
     private eventEmitter: EventEmitter2,
   ) {}
 
-  async findAll() {
+  async findAll({
+    page = 0,
+    pageSize = 10,
+  }: {
+    page?: number;
+    pageSize?: number;
+  }) {
     let posts = await this.postModel
       .find()
-      .populate('author')
-      .populate('likes');
+      .populate('likes')
+      .skip(page * pageSize)
+      .limit(pageSize);
+
     return posts;
   }
 
@@ -32,10 +40,7 @@ export class PostsService {
   }
 
   async findOne(param: IdParam) {
-    let postFound = await this.postModel
-      .findById(param.id)
-      .populate('author')
-      .populate('likes');
+    let postFound = await this.postModel.findById(param.id).populate('likes');
     if (!postFound) {
       return new NotFoundException();
     } else {

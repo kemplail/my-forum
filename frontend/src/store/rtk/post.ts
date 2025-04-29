@@ -1,76 +1,87 @@
-import api from "src/services";
 import { Post } from "src/types/post";
-import { axiosBaseQuery } from "../axiosBaseQuery";
-import { createApi } from '@reduxjs/toolkit/query/react'
 import { PostForm } from "src/types/postForm";
 import { LikePost } from "src/types/likePost";
 import { LikePostForm } from "src/types/likePostForm";
 import { emptySplitApi } from "./emptySplitApi";
 
+type PaginationParams = {
+  page: number;
+  pageSize: number;
+};
+
 export const postApi = emptySplitApi.injectEndpoints({
   endpoints: (builder) => ({
-    getAllPosts: builder.query<Post[], void>({
-      query: () => ({
-        url: 'posts',
-        method: 'GET'
+    getAllPosts: builder.query<Post[], PaginationParams>({
+      query: ({ page, pageSize }) => ({
+        url: `posts?page=${page}&pageSize=${pageSize}`,
+        method: "GET",
       }),
-      providesTags: ["Post","LikePost"]
+      providesTags: ["Post", "LikePost"],
     }),
     addPost: builder.mutation<Post, PostForm>({
       query: (post) => ({
-        url: 'posts',
-        method: 'POST',
-        data: post
+        url: "posts",
+        method: "POST",
+        data: post,
       }),
-      invalidatesTags: ["Post"]
+      invalidatesTags: ["Post"],
     }),
     updatePost: builder.mutation<Post, Post>({
       query: (post) => ({
         url: `posts/${post._id}`,
         method: "PATCH",
-        data: post 
+        data: post,
       }),
-      invalidatesTags: ["Post"]
+      invalidatesTags: ["Post"],
     }),
     deletePost: builder.mutation<Post, string>({
       query: (id) => ({
         url: `posts/${id}`,
-        method: "DELETE"
+        method: "DELETE",
       }),
-      invalidatesTags: ["Post"]
+      invalidatesTags: ["Post"],
     }),
     getAPost: builder.query<Post, string>({
       query: (id) => ({
         url: `posts/${id}`,
-        method: 'GET'
+        method: "GET",
       }),
-      providesTags: ["Post","LikePost"]
+      providesTags: ["Post", "LikePost"],
     }),
     addALikePost: builder.mutation<LikePost, LikePostForm>({
       query: (like) => ({
-          url: 'likes/post',
-          method: 'POST',
-          data: like
+        url: "likes/post",
+        method: "POST",
+        data: like,
       }),
       invalidatesTags: (result, error, arg) => [
-        { type: 'LikePost', post: arg.post }
+        { type: "LikePost", post: arg.post },
       ],
     }),
     getLikeOfUserOnPost: builder.query<LikePost, string>({
       query: (id) => ({
         url: `likes/post/loggeduser/${id}`,
-        method: "GET"
+        method: "GET",
       }),
-      providesTags: ["LikePost"]
+      providesTags: ["LikePost"],
     }),
     deleteLikeOfUserOnPost: builder.mutation<LikePost, string>({
       query: (id) => ({
         url: `likes/post/${id}`,
-        method: "DELETE"
+        method: "DELETE",
       }),
-      invalidatesTags: ["LikePost"]
-    })
+      invalidatesTags: ["LikePost"],
+    }),
   }),
-})
+});
 
-export const { useGetAllPostsQuery, useAddPostMutation, useUpdatePostMutation, useDeletePostMutation, useGetAPostQuery, useAddALikePostMutation, useGetLikeOfUserOnPostQuery, useDeleteLikeOfUserOnPostMutation } = postApi
+export const {
+  useGetAllPostsQuery,
+  useAddPostMutation,
+  useUpdatePostMutation,
+  useDeletePostMutation,
+  useGetAPostQuery,
+  useAddALikePostMutation,
+  useGetLikeOfUserOnPostQuery,
+  useDeleteLikeOfUserOnPostMutation,
+} = postApi;
