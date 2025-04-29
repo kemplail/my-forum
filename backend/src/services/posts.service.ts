@@ -10,16 +10,21 @@ import { PostDeletedEvent } from 'src/events/PostDeletedEvent';
 
 @Injectable()
 export class PostsService {
-  constructor(@InjectModel(Post.name) private postModel: Model<PostDocument>, private eventEmitter: EventEmitter2) {}
+  constructor(
+    @InjectModel(Post.name) private postModel: Model<PostDocument>,
+    private eventEmitter: EventEmitter2,
+  ) {}
 
   async findAll() {
-    let posts = await this.postModel.find().populate('author').populate('likes');
+    let posts = await this.postModel
+      .find()
+      .populate('author')
+      .populate('likes');
     return posts;
   }
 
   async create(createPostDTO: CreatePostDTO, author: IdParam): Promise<Post> {
-    
-    const newPost = new this.postModel({ ...createPostDTO, author:author.id });
+    const newPost = new this.postModel({ ...createPostDTO, author: author.id });
     newPost.date = new Date();
     (await newPost.populate('author')).populate('likes');
 
@@ -27,7 +32,10 @@ export class PostsService {
   }
 
   async findOne(param: IdParam) {
-    let postFound = await this.postModel.findById(param.id).populate('author').populate('likes');
+    let postFound = await this.postModel
+      .findById(param.id)
+      .populate('author')
+      .populate('likes');
     if (!postFound) {
       return new NotFoundException();
     } else {
@@ -36,23 +44,26 @@ export class PostsService {
   }
 
   async deleteOne(param: IdParam, userid: IdParam) {
-
-    const deletedPost = await this.postModel.findOneAndDelete({ _id: param.id, author: userid.id }).exec();
+    const deletedPost = await this.postModel
+      .findOneAndDelete({ _id: param.id, author: userid.id })
+      .exec();
 
     const postDeletedEvent = new PostDeletedEvent();
-    postDeletedEvent._id = deletedPost._id;
+    postDeletedEvent._id = deletedPost._id.toString();
     this.eventEmitter.emit('post.deleted', postDeletedEvent);
 
     return deletedPost;
-    
   }
 
   async update(updatePostDTO: UpdatePostDTO, param: IdParam, userid: IdParam) {
-    return await this.postModel.findOneAndUpdate({ _id: param.id, author: userid.id }, { $set: {...updatePostDTO, lastUpdate: new Date() }}, { new: true });
+    return await this.postModel.findOneAndUpdate(
+      { _id: param.id, author: userid.id },
+      { $set: { ...updatePostDTO, lastUpdate: new Date() } },
+      { new: true },
+    );
   }
 
   async getPostsOfAnUser(param: IdParam) {
-    return await this.postModel.find({author:param.id});
+    return await this.postModel.find({ author: param.id });
   }
-
 }

@@ -1,56 +1,68 @@
-import { Controller, Get, Body, Post, Param, Delete, Patch, UseGuards, Request } from '@nestjs/common';
-import { CommentsService } from 'src/services/comments.service';
-import { CreateCommentDTO } from 'src/models/comments/dto/CreateCommentDTO';
-import { IdParam } from 'src/models/IdParam';
+import {
+  Controller,
+  Get,
+  Body,
+  Post,
+  Param,
+  Delete,
+  Patch,
+  UseGuards,
+  Request,
+} from '@nestjs/common'
+import { CommentsService } from 'src/services/comments.service'
+import { CreateCommentDTO } from 'src/models/comments/dto/CreateCommentDTO'
+import { IdParam } from 'src/models/IdParam'
 import { UpdateCommentDTO } from 'src/models/comments/dto/UpdateCommentDTO'
-import { JwtAuthGuard } from 'src/auth/jwt-auth.guards';
+import { JwtAuthGuard } from 'src/auth/jwt-auth.guards'
 
 @Controller('comments')
 export class CommentsController {
+  constructor(private readonly commentsService: CommentsService) {}
 
-    constructor(private readonly commentsService: CommentsService) {}
+  @UseGuards(JwtAuthGuard)
+  @Post()
+  async create(@Request() req, @Body() createCommentDTO: CreateCommentDTO) {
+    return this.commentsService.create(createCommentDTO, req.user)
+  }
 
-    @UseGuards(JwtAuthGuard)
-    @Post()
-    async create(@Request() req, @Body() createCommentDTO: CreateCommentDTO) {
-        return this.commentsService.create(createCommentDTO, req.user);
-    }
+  @Get()
+  async findAll() {
+    return this.commentsService.findAll()
+  }
 
-    @Get()
-    async findAll() {
-        return this.commentsService.findAll();
-    }
+  @Get(':id')
+  async findOne(@Param() param: IdParam) {
+    return this.commentsService.findOne(param)
+  }
 
-    @Get(':id')
-    async findOne(@Param() param: IdParam) {
-        return this.commentsService.findOne(param);
-    }
+  @UseGuards(JwtAuthGuard)
+  @Delete(':id')
+  async delete(@Request() req, @Param() param: IdParam) {
+    return this.commentsService.delete(param, req.user)
+  }
 
-    @UseGuards(JwtAuthGuard)
-    @Delete(':id')
-    async delete(@Request() req, @Param() param: IdParam) {
-        return this.commentsService.delete(param, req.user);
-    }
+  @UseGuards(JwtAuthGuard)
+  @Patch(':id')
+  async update(
+    @Request() req,
+    @Body() updateCommentDTO: UpdateCommentDTO,
+    @Param() param: IdParam,
+  ) {
+    return this.commentsService.update(updateCommentDTO, param, req.user)
+  }
 
-    @UseGuards(JwtAuthGuard)
-    @Patch(':id')
-    async update(@Request() req, @Body() updateCommentDTO : UpdateCommentDTO, @Param() param: IdParam) {
-        return this.commentsService.update(updateCommentDTO, param, req.user);
-    }
+  @Get('/post/:id')
+  async findAllCommentsOfAPost(@Param() param: IdParam) {
+    return this.commentsService.findAllCommentsOfAPost(param)
+  }
 
-    @Get('/post/:id')
-    async findAllCommentsOfAPost(@Param() param: IdParam) {
-        return this.commentsService.findAllCommentsOfAPost(param);
-    }
+  @Get('/post/nbComments/:id')
+  async getNbCommentsOfAPost(@Param() param: IdParam) {
+    return this.commentsService.getNbCommentsOfAPost(param)
+  }
 
-    @Get('/post/nbComments/:id')
-    async getNbCommentsOfAPost(@Param() param: IdParam) {
-        return this.commentsService.getNbCommentsOfAPost(param);
-    }
-
-    @Get('/user/:id')
-    async findAllCommentsOfAnUser(@Param() param: IdParam) {
-        return this.commentsService.findAllCommentsOfAnUser(param);
-    }
-
+  @Get('/user/:id')
+  async findAllCommentsOfAnUser(@Param() param: IdParam) {
+    return this.commentsService.findAllCommentsOfAnUser(param)
+  }
 }

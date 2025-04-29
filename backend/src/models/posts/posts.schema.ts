@@ -5,11 +5,11 @@ import {
   InjectModel,
   getModelToken,
 } from '@nestjs/mongoose';
-import { Document } from 'mongoose';
+import { Document, Types } from 'mongoose';
 import { User } from '../users/user.schema';
 import * as mongoose from 'mongoose';
 
-export type PostDocument = Post & Document;
+export type PostDocument = Post & Document<Types.ObjectId>;
 
 @Schema({
   toJSON: { virtuals: true },

@@ -1,3 +1,3 @@
 export class PostDeletedEvent {
-    _id : string;
+  _id: string;
 }
