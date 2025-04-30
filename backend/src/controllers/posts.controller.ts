@@ -15,16 +15,16 @@ import { IdParam } from 'src/models/IdParam';
 import { UpdatePostDTO } from '../models/posts/dto/UpdatePostDTO';
 import { PostsService } from 'src/services/posts.service';
 import { CreatePostDTO } from '../models/posts/dto/CreatePostDTO';
-import { QueryPaginationDTO } from 'src/models/posts/dto/QueryPaginationDTO';
+import { FindAllPostsDTO } from 'src/models/posts/dto/FindAllPostsDTO';
 
 @Controller('posts')
 export class PostsController {
   constructor(private readonly postsService: PostsService) {}
 
   @Get()
-  async findAll(@Query() query: QueryPaginationDTO) {
-    const { page, pageSize } = query;
-    return this.postsService.findAll({ page, pageSize });
+  async findAll(@Query() queryParams: FindAllPostsDTO) {
+    const { page, pageSize, query } = queryParams;
+    return this.postsService.findAll({ page, pageSize, query });
   }
 
   @UseGuards(JwtAuthGuard)

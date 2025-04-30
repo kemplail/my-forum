@@ -1,13 +1,8 @@
-import {
-  Schema,
-  Prop,
-  SchemaFactory,
-  InjectModel,
-  getModelToken,
-} from '@nestjs/mongoose';
+import { Schema, Prop, SchemaFactory } from '@nestjs/mongoose';
 import { Document, Types } from 'mongoose';
 import { User } from '../users/user.schema';
 import * as mongoose from 'mongoose';
+import { LikePost } from '../likes/likepost.schema';
 
 export type PostDocument = Post & Document<Types.ObjectId>;
 
@@ -35,3 +30,5 @@ PostSchema.virtual('likes', {
   localField: '_id',
   foreignField: 'post',
 });
+
+export type PostWithLikes = Post & { likes: LikePost[] };

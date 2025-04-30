@@ -2,11 +2,23 @@ import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { CreatePostDTO } from '../models/posts/dto/CreatePostDTO';
 import { UpdatePostDTO } from '../models/posts/dto/UpdatePostDTO';
-import { Model } from 'mongoose';
-import { Post, PostDocument } from '../models/posts/posts.schema';
+import { Model, PipelineStage } from 'mongoose';
+import {
+  Post,
+  PostDocument,
+  PostWithLikes,
+} from '../models/posts/posts.schema';
 import { IdParam } from '../models/IdParam';
 import { EventEmitter2 } from '@nestjs/event-emitter';
 import { PostDeletedEvent } from 'src/events/PostDeletedEvent';
+
+type FindAllSearchOperator = {
+  phrase: {
+    query: string;
+    path: string[];
+    slop: number;
+  };
+};
 
 @Injectable()
 export class PostsService {
@@ -18,20 +30,70 @@ export class PostsService {
   async findAll({
     page = 0,
     pageSize = 10,
+    query,
   }: {
     page?: number;
     pageSize?: number;
+    query?: string;
   }) {
-    let posts = await this.postModel
-      .find()
-      .populate('likes')
-      .skip(page * pageSize)
-      .limit(pageSize);
+    let searchOperator: FindAllSearchOperator | undefined;
 
-    return posts;
+    if (query) {
+      searchOperator = {
+        phrase: {
+          query,
+          path: ['title', 'text'],
+          slop: 2,
+        },
+      };
+    }
+
+    const aggregationSteps: PipelineStage[] = [];
+
+    if (searchOperator) {
+      aggregationSteps.push({
+        $search: {
+          ...searchOperator,
+          sort: {
+            score: {
+              $meta: 'searchScore',
+              order: 1,
+            },
+          },
+        },
+      });
+    }
+
+    aggregationSteps.push(
+      ...[
+        {
+          $lookup: {
+            from: 'likeposts',
+            localField: '_id',
+            foreignField: 'post',
+            as: 'likes',
+          },
+        },
+        {
+          $skip: (page - 1) * pageSize,
+        },
+        {
+          $limit: pageSize,
+        },
+        {
+          $addFields: {
+            score: {
+              $meta: 'searchScore',
+            },
+          },
+        },
+      ],
+    );
+
+    return await this.postModel.aggregate<PostWithLikes>(aggregationSteps);
   }
 
-  async create(createPostDTO: CreatePostDTO, author: IdParam): Promise<Post> {
+  async create(createPostDTO: CreatePostDTO, author: IdParam) {
     const newPost = new this.postModel({ ...createPostDTO, author: author.id });
     newPost.date = new Date();
     (await newPost.populate('author')).populate('likes');
