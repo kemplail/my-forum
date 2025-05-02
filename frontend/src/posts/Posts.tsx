@@ -11,6 +11,8 @@ import { useLocation } from "react-router-dom";
 import { PaginationBar } from "src/paginationbar/PaginationBar";
 import { SearchBar } from "src/searchbar/SearchBar";
 
+const ITEMS_PER_PAGE = 10;
+
 export function Posts() {
   const locationData: { state: any } = useLocation();
 
@@ -21,7 +23,7 @@ export function Posts() {
 
   const { data, isLoading } = useGetAllPostsQuery({
     page,
-    pageSize: 10,
+    pageSize: ITEMS_PER_PAGE,
     ...(query ? { query } : {}),
   });
 
@@ -78,6 +80,7 @@ export function Posts() {
         page={page}
         totalCount={data?.meta.totalCount}
         dataIsLoading={isLoading}
+        itemsPerPage={ITEMS_PER_PAGE}
       />
     </div>
   );
