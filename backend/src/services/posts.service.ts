@@ -12,13 +12,21 @@ import { IdParam } from '../models/IdParam';
 import { EventEmitter2 } from '@nestjs/event-emitter';
 import { PostDeletedEvent } from 'src/events/PostDeletedEvent';
 
-type FindAllSearchOperator = {
-  phrase: {
-    query: string;
-    path: string[];
-    slop: number;
-  };
-};
+const DEFAULT_PAGE_SIZE = 10;
+
+export type FindAllPostsParams =
+  | {
+      query: string;
+      pageSize?: number;
+      direction: 'before' | 'after';
+      paginationToken: string;
+    }
+  | {
+      query: string;
+      pageSize?: number;
+      direction?: never;
+      paginationToken?: never;
+    };
 
 @Injectable()
 export class PostsService {
@@ -28,110 +36,96 @@ export class PostsService {
   ) {}
 
   async findAll({
-    page = 1,
-    pageSize = 10,
     query,
-  }: {
-    page?: number;
-    pageSize?: number;
-    query?: string;
-  }) {
-    let searchOperator: FindAllSearchOperator | undefined;
+    pageSize = DEFAULT_PAGE_SIZE,
+    direction,
+    paginationToken,
+  }: FindAllPostsParams) {
+    const searchOperator = query
+      ? {
+          phrase: {
+            query,
+            path: ['title', 'text'],
+            slop: 2,
+          },
+        }
+      : { exists: { path: 'title' } };
 
-    if (query) {
-      searchOperator = {
-        phrase: {
-          query,
-          path: ['title', 'text'],
-          slop: 2,
-        },
-      };
+    let paginationOption:
+      | { searchBefore: string }
+      | { searchAfter: string }
+      | {} = {};
+
+    if (paginationToken) {
+      if (direction === 'before') {
+        paginationOption = { searchBefore: paginationToken };
+      } else {
+        paginationOption = { searchAfter: paginationToken };
+      }
     }
 
-    const lookUpStep = {
-      $lookup: {
-        from: 'likeposts',
-        localField: '_id',
-        foreignField: 'post',
-        as: 'likes',
+    const aggregationSteps: PipelineStage[] = [
+      {
+        $search: {
+          ...searchOperator,
+          sort: {
+            score: {
+              $meta: 'searchScore',
+              order: 1,
+            },
+          },
+          ...paginationOption,
+          count: {
+            type: 'total',
+          },
+        },
       },
-    };
-
-    const aggregationSteps: PipelineStage[] = searchOperator
-      ? [
-          {
-            $search: {
-              ...searchOperator,
-              sort: {
-                score: {
-                  $meta: 'searchScore',
-                  order: 1,
-                },
-              },
-              count: {
-                type: 'total',
-              },
-            },
-          },
-          {
-            $skip: (page - 1) * pageSize,
-          },
-          {
-            $limit: pageSize,
-          },
-          {
-            $addFields: {
-              totalCount: '$$SEARCH_META.count.total',
-            },
-          },
-          lookUpStep,
-          {
-            $group: {
-              _id: null,
-              documents: { $push: '$$ROOT' },
-            },
-          },
-          {
-            $addFields: {
-              totalCount: {
-                $getField: {
-                  field: 'totalCount',
-                  input: {
-                    $arrayElemAt: ['$documents', 0],
-                  },
+      {
+        $limit: pageSize,
+      },
+      {
+        $addFields: {
+          totalCount: '$$SEARCH_META.count.total',
+          paginationToken: { $meta: 'searchSequenceToken' },
+        },
+      },
+      {
+        $lookup: {
+          from: 'likeposts',
+          localField: '_id',
+          foreignField: 'post',
+          as: 'likes',
+        },
+      },
+      {
+        $group: {
+          _id: null,
+          documents: { $push: '$$ROOT' },
+        },
+      },
+      {
+        $addFields: {
+          meta: {
+            totalCount: {
+              $getField: {
+                field: 'totalCount',
+                input: {
+                  $arrayElemAt: ['$documents', 0],
                 },
               },
             },
           },
-          {
-            $project: {
-              _id: 0,
-            },
-          },
-        ]
-      : [
-          {
-            $skip: (page - 1) * pageSize,
-          },
-          {
-            $limit: pageSize,
-          },
-          lookUpStep,
-          {
-            $facet: {
-              totalCount: [{ $count: 'totalCount' }],
-              documents: [],
-            },
-          },
-          {
-            $project: {
-              meta: {
-                $arrayElemAt: ['$totalCount', 0],
-              },
-              documents: 1,
-            },
-          },
-        ];
+        },
+      },
+      {
+        $unset: 'documents.totalCount',
+      },
+      {
+        $project: {
+          _id: 0,
+        },
+      },
+    ];
 
     const result =
       await this.postModel.aggregate<PaginatedPostWithLikes>(aggregationSteps);

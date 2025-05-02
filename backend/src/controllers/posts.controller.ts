@@ -23,8 +23,8 @@ export class PostsController {
 
   @Get()
   async findAll(@Query() queryParams: FindAllPostsDTO) {
-    const { page, pageSize, query } = queryParams;
-    return this.postsService.findAll({ page, pageSize, query });
+    const params = FindAllPostsDTO.toFindAllPostsParams(queryParams);
+    return this.postsService.findAll(params);
   }
 
   @UseGuards(JwtAuthGuard)

@@ -1,12 +1,21 @@
-import { ApiProperty } from '@nestjs/swagger';
-import { QueryPaginationDTO } from './QueryPaginationDTO';
+import { ApiPropertyOptional } from '@nestjs/swagger';
 import { IsOptional, IsString } from 'class-validator';
-import { Type } from 'class-transformer';
+import { FindAllPostsParams } from 'src/services/posts.service';
+import { SearchPaginationDTO } from './SearchPaginationDTO';
 
-export class FindAllPostsDTO extends QueryPaginationDTO {
-  @ApiProperty()
+export class FindAllPostsDTO extends SearchPaginationDTO {
+  @ApiPropertyOptional()
   @IsOptional()
   @IsString()
-  @Type(() => String)
   query: string;
+
+  static toFindAllPostsParams(dto: FindAllPostsDTO): FindAllPostsParams {
+    const { query, pageSize, direction, paginationToken } = dto;
+
+    if (direction && paginationToken) {
+      return { query, pageSize, direction, paginationToken };
+    }
+
+    return { query, pageSize };
+  }
 }
