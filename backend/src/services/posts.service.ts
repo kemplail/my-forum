@@ -86,7 +86,7 @@ export class PostsService {
       },
       {
         $addFields: {
-          totalCount: '$$SEARCH_META.count.total',
+          meta: { totalCount: '$$SEARCH_META.count.total' },
           paginationToken: { $meta: 'searchSequenceToken' },
         },
       },
@@ -102,24 +102,13 @@ export class PostsService {
         $group: {
           _id: null,
           documents: { $push: '$$ROOT' },
-        },
-      },
-      {
-        $addFields: {
           meta: {
-            totalCount: {
-              $getField: {
-                field: 'totalCount',
-                input: {
-                  $arrayElemAt: ['$documents', 0],
-                },
-              },
-            },
+            $first: '$meta',
           },
         },
       },
       {
-        $unset: 'documents.totalCount',
+        $unset: 'documents.meta',
       },
       {
         $project: {
@@ -128,10 +117,8 @@ export class PostsService {
       },
     ];
 
-    const result =
+    const [{ documents, meta } = { documents: [], meta: { totalCount: 0 } }] =
       await this.postModel.aggregate<PaginatedPostWithLikes>(aggregationSteps);
-
-    const { documents = [], meta = { totalCount: 0 } } = result[0] || {};
 
     return {
       documents:
