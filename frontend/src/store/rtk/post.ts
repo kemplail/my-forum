@@ -9,13 +9,25 @@ type PaginationParams = {
   pageSize: number;
 };
 
+type GetAllPostsParams = PaginationParams & {
+  query?: string;
+};
+
 export const postApi = emptySplitApi.injectEndpoints({
   endpoints: (builder) => ({
-    getAllPosts: builder.query<Post[], PaginationParams>({
-      query: ({ page, pageSize }) => ({
-        url: `posts?page=${page}&pageSize=${pageSize}`,
-        method: "GET",
-      }),
+    getAllPosts: builder.query<Post[], GetAllPostsParams>({
+      query: ({ page, pageSize, query }) => {
+        let url = `posts?page=${page}&pageSize=${pageSize}`;
+
+        if (query) {
+          url = `${url}&query=${query}`;
+        }
+
+        return {
+          url,
+          method: "GET",
+        };
+      },
       providesTags: ["Post", "LikePost"],
     }),
     addPost: builder.mutation<Post, PostForm>({
