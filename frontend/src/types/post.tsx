@@ -12,7 +12,9 @@ export type Post = {
   likes: LikePost[];
 };
 
+export type PaginatedPost = Post & { paginationToken: string };
+
 export type PaginatedPosts = {
-  documents: Post[];
+  documents: PaginatedPost[];
   meta: Pagination;
 };

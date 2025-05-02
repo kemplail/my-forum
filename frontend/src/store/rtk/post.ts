@@ -5,26 +5,32 @@ import { LikePostForm } from "src/types/likePostForm";
 import { emptySplitApi } from "./emptySplitApi";
 
 type PaginationParams = {
-  page: number;
   pageSize: number;
+  paginationToken: string | null;
+  direction: "before" | "after" | null;
 };
 
 type GetAllPostsParams = PaginationParams & {
-  query?: string;
+  query: string | null;
 };
 
 export const postApi = emptySplitApi.injectEndpoints({
   endpoints: (builder) => ({
     getAllPosts: builder.query<PaginatedPosts, GetAllPostsParams>({
-      query: ({ page, pageSize, query }) => {
-        let url = `posts?page=${page}&pageSize=${pageSize}`;
+      query: ({ pageSize, query, paginationToken, direction }) => {
+        const params: string[] = [];
 
-        if (query) {
-          url = `${url}&query=${query}`;
-        }
+        params.push(`pageSize=${pageSize}`);
+
+        if (query) params.push(`query=${encodeURIComponent(query)}`);
+
+        if (paginationToken)
+          params.push(`paginationToken=${encodeURIComponent(paginationToken)}`);
+
+        if (direction) params.push(`direction=${direction}`);
 
         return {
-          url,
+          url: `posts?${params.join("&")}`,
           method: "GET",
         };
       },

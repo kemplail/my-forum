@@ -73,6 +73,7 @@ export class PostsService {
               $meta: 'searchScore',
               order: 1,
             },
+            _id: 1,
           },
           ...paginationOption,
           count: {
@@ -132,7 +133,11 @@ export class PostsService {
 
     const { documents = [], meta = { totalCount: 0 } } = result[0] || {};
 
-    return { documents, meta };
+    return {
+      documents:
+        direction && direction === 'before' ? documents.reverse() : documents,
+      meta,
+    };
   }
 
   async create(createPostDTO: CreatePostDTO, author: IdParam) {

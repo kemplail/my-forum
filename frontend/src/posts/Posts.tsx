@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { PostElement } from "./PostElement";
 import Title from "../textelements/Title";
 import AddPostModal from "../modals/AddPostModal";
@@ -17,23 +17,41 @@ export function Posts() {
   const locationData: { state: any } = useLocation();
 
   const [isOpen, setIsOpen] = useState(locationData.state ? true : false);
-
   const [page, setPage] = useState(1);
-  const [query, setQuery] = useState<string | undefined>(undefined);
+  const [query, setQuery] = useState<string>("");
+  const [paginationToken, setPaginationToken] = useState<string | null>(null);
+  const [direction, setDirection] = useState<"before" | "after" | null>(null);
 
   const { data, isLoading } = useGetAllPostsQuery({
-    page,
     pageSize: ITEMS_PER_PAGE,
-    ...(query ? { query } : {}),
+    query,
+    paginationToken,
+    direction,
   });
+
+  const { firstToken, lastToken } = useMemo(() => {
+    if (data && data.documents.length >= 1) {
+      return {
+        firstToken: data.documents[0].paginationToken,
+        lastToken: data.documents[data.documents.length - 1].paginationToken,
+      };
+    }
+    return { firstToken: null, lastToken: null };
+  }, [data]);
+
+  console.log(firstToken, lastToken, paginationToken);
 
   const accesstoken = useAppSelector((state) => state.user.access_token);
 
   function goToNextPage() {
+    setPaginationToken(lastToken);
+    setDirection("after");
     setPage((previousPage) => previousPage + 1);
   }
 
   function goToPreviousPage() {
+    setPaginationToken(firstToken);
+    setDirection("before");
     setPage((prev) => Math.max(prev - 1, 1));
   }
 
