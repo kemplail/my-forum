@@ -31,4 +31,9 @@ PostSchema.virtual('likes', {
   foreignField: 'post',
 });
 
+export type Pagination = { totalCount: number };
 export type PostWithLikes = Post & { likes: LikePost[] };
+export type PaginatedPostWithLikes = {
+  documents: PostWithLikes[];
+  meta: Pagination;
+};

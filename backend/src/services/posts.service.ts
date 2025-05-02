@@ -4,9 +4,9 @@ import { CreatePostDTO } from '../models/posts/dto/CreatePostDTO';
 import { UpdatePostDTO } from '../models/posts/dto/UpdatePostDTO';
 import { Model, PipelineStage } from 'mongoose';
 import {
+  PaginatedPostWithLikes,
   Post,
   PostDocument,
-  PostWithLikes,
 } from '../models/posts/posts.schema';
 import { IdParam } from '../models/IdParam';
 import { EventEmitter2 } from '@nestjs/event-emitter';
@@ -75,22 +75,32 @@ export class PostsService {
           },
         },
         {
-          $skip: (page - 1) * pageSize,
+          $facet: {
+            totalCount: [{ $count: 'totalCount' }],
+            documents: [
+              {
+                $skip: (page - 1) * pageSize,
+              },
+              {
+                $limit: pageSize,
+              },
+            ],
+          },
         },
         {
-          $limit: pageSize,
-        },
-        {
-          $addFields: {
-            score: {
-              $meta: 'searchScore',
+          $project: {
+            meta: {
+              $arrayElemAt: ['$totalCount', 0],
             },
+            documents: 1,
           },
         },
       ],
     );
 
-    return await this.postModel.aggregate<PostWithLikes>(aggregationSteps);
+    return await this.postModel.aggregate<PaginatedPostWithLikes>(
+      aggregationSteps,
+    );
   }
 
   async create(createPostDTO: CreatePostDTO, author: IdParam) {
