@@ -48,55 +48,90 @@ export class PostsService {
       };
     }
 
-    const aggregationSteps: PipelineStage[] = [];
+    const lookUpStep = {
+      $lookup: {
+        from: 'likeposts',
+        localField: '_id',
+        foreignField: 'post',
+        as: 'likes',
+      },
+    };
 
-    if (searchOperator) {
-      aggregationSteps.push({
-        $search: {
-          ...searchOperator,
-          sort: {
-            score: {
-              $meta: 'searchScore',
-              order: 1,
+    const aggregationSteps: PipelineStage[] = searchOperator
+      ? [
+          {
+            $search: {
+              ...searchOperator,
+              sort: {
+                score: {
+                  $meta: 'searchScore',
+                  order: 1,
+                },
+              },
+              count: {
+                type: 'total',
+              },
             },
           },
-        },
-      });
-    }
-
-    aggregationSteps.push(
-      ...[
-        {
-          $lookup: {
-            from: 'likeposts',
-            localField: '_id',
-            foreignField: 'post',
-            as: 'likes',
+          {
+            $skip: (page - 1) * pageSize,
           },
-        },
-        {
-          $facet: {
-            totalCount: [{ $count: 'totalCount' }],
-            documents: [
-              {
-                $skip: (page - 1) * pageSize,
-              },
-              {
-                $limit: pageSize,
-              },
-            ],
+          {
+            $limit: pageSize,
           },
-        },
-        {
-          $project: {
-            meta: {
-              $arrayElemAt: ['$totalCount', 0],
+          {
+            $addFields: {
+              totalCount: '$$SEARCH_META.count.total',
             },
-            documents: 1,
           },
-        },
-      ],
-    );
+          lookUpStep,
+          {
+            $group: {
+              _id: null,
+              documents: { $push: '$$ROOT' },
+            },
+          },
+          {
+            $addFields: {
+              totalCount: {
+                $getField: {
+                  field: 'totalCount',
+                  input: {
+                    $arrayElemAt: ['$documents', 0],
+                  },
+                },
+              },
+            },
+          },
+          {
+            $project: {
+              _id: 0,
+            },
+          },
+        ]
+      : [
+          {
+            $skip: (page - 1) * pageSize,
+          },
+          {
+            $limit: pageSize,
+          },
+          lookUpStep,
+          {
+            $facet: {
+              totalCount: [{ $count: 'totalCount' }],
+              documents: [],
+            },
+          },
+          {
+            $project: {
+              meta: {
+                $arrayElemAt: ['$totalCount', 0],
+              },
+              documents: 1,
+            },
+          },
+        ];
 
     const result =
       await this.postModel.aggregate<PaginatedPostWithLikes>(aggregationSteps);
