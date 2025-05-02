@@ -28,7 +28,7 @@ export class PostsService {
   ) {}
 
   async findAll({
-    page = 0,
+    page = 1,
     pageSize = 10,
     query,
   }: {
@@ -98,9 +98,12 @@ export class PostsService {
       ],
     );
 
-    return await this.postModel.aggregate<PaginatedPostWithLikes>(
-      aggregationSteps,
-    );
+    const result =
+      await this.postModel.aggregate<PaginatedPostWithLikes>(aggregationSteps);
+
+    const { documents = [], meta = { totalCount: 0 } } = result[0] || {};
+
+    return { documents, meta };
   }
 
   async create(createPostDTO: CreatePostDTO, author: IdParam) {

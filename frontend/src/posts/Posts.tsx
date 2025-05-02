@@ -19,10 +19,10 @@ export function Posts() {
   const [page, setPage] = useState(1);
   const [query, setQuery] = useState<string | undefined>(undefined);
 
-  const { data, isLoading, error } = useGetAllPostsQuery({
+  const { data, isLoading } = useGetAllPostsQuery({
     page,
     pageSize: 10,
-    query,
+    ...(query ? { query } : {}),
   });
 
   const accesstoken = useAppSelector((state) => state.user.access_token);
@@ -36,7 +36,7 @@ export function Posts() {
   }
 
   function showPosts() {
-    return data?.map((element: Post) => {
+    return data?.documents.map((element: Post) => {
       return <PostElement key={element._id} post={element} />;
     });
   }
@@ -76,6 +76,8 @@ export function Posts() {
         onPrevious={goToPreviousPage}
         onNext={goToNextPage}
         page={page}
+        totalCount={data?.meta.totalCount}
+        dataIsLoading={isLoading}
       />
     </div>
   );

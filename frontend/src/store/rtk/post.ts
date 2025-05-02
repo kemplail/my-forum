@@ -1,4 +1,4 @@
-import { Post } from "src/types/post";
+import { PaginatedPosts, Post } from "src/types/post";
 import { PostForm } from "src/types/postForm";
 import { LikePost } from "src/types/likePost";
 import { LikePostForm } from "src/types/likePostForm";
@@ -15,7 +15,7 @@ type GetAllPostsParams = PaginationParams & {
 
 export const postApi = emptySplitApi.injectEndpoints({
   endpoints: (builder) => ({
-    getAllPosts: builder.query<Post[], GetAllPostsParams>({
+    getAllPosts: builder.query<PaginatedPosts, GetAllPostsParams>({
       query: ({ page, pageSize, query }) => {
         let url = `posts?page=${page}&pageSize=${pageSize}`;
 
