@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { PostElement } from "./PostElement";
 import Title from "../textelements/Title";
 import AddPostModal from "../modals/AddPostModal";
@@ -29,6 +29,12 @@ export function Posts() {
     direction,
   });
 
+  useEffect(() => {
+    setPaginationToken(null);
+    setDirection(null);
+    setPage(1);
+  }, [query]);
+
   const { firstToken, lastToken } = useMemo(() => {
     if (data && data.documents.length >= 1) {
       return {
@@ -38,8 +44,6 @@ export function Posts() {
     }
     return { firstToken: null, lastToken: null };
   }, [data]);
-
-  console.log(firstToken, lastToken, paginationToken);
 
   const accesstoken = useAppSelector((state) => state.user.access_token);
 

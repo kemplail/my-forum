@@ -24,10 +24,10 @@ export const postApi = emptySplitApi.injectEndpoints({
 
         if (query) params.push(`query=${encodeURIComponent(query)}`);
 
-        if (paginationToken)
+        if (paginationToken && direction) {
           params.push(`paginationToken=${encodeURIComponent(paginationToken)}`);
-
-        if (direction) params.push(`direction=${direction}`);
+          params.push(`direction=${direction}`);
+        }
 
         return {
           url: `posts?${params.join("&")}`,
