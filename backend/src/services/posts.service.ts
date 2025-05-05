@@ -181,6 +181,7 @@ export class PostsService {
           as: 'likes',
         },
       },
+      { $unset: 'vector' },
     ];
 
     return await this.postModel.aggregate<PostWithLikes[]>(aggregationSteps);
