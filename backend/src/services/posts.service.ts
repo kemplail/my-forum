@@ -7,10 +7,13 @@ import {
   PaginatedPostWithLikes,
   Post,
   PostDocument,
+  PostWithLikes,
 } from '../models/posts/posts.schema';
 import { IdParam } from '../models/IdParam';
 import { EventEmitter2 } from '@nestjs/event-emitter';
 import { PostDeletedEvent } from 'src/events/PostDeletedEvent';
+import { HttpService } from '@nestjs/axios';
+import { lastValueFrom } from 'rxjs';
 
 const DEFAULT_PAGE_SIZE = 10;
 
@@ -33,6 +36,7 @@ export class PostsService {
   constructor(
     @InjectModel(Post.name) private postModel: Model<PostDocument>,
     private eventEmitter: EventEmitter2,
+    private httpService: HttpService,
   ) {}
 
   async findAll({
@@ -125,6 +129,61 @@ export class PostsService {
         direction && direction === 'before' ? documents.reverse() : documents,
       meta,
     };
+  }
+
+  async semanticSearch({
+    query,
+    limit = 10,
+  }: {
+    query: string;
+    limit: number;
+  }) {
+    let vector: number[];
+
+    try {
+      const response = await lastValueFrom(
+        this.httpService.post<{ vector: number[] }>(
+          `${process.env.SEMANTIC_SEARCH_API_URL}/vectorize-search`,
+          {
+            text: query,
+          },
+        ),
+      );
+
+      vector = response.data.vector;
+    } catch (e) {
+      throw new Error(
+        `An error occured when trying to call semantic search api : ${e}`,
+      );
+    }
+
+    if (!vector) {
+      throw new Error('Vector not defined');
+    }
+
+    const numCandidates = limit * 30;
+
+    const aggregationSteps: PipelineStage[] = [
+      {
+        $vectorSearch: {
+          queryVector: vector,
+          path: 'vector',
+          numCandidates,
+          index: 'vector_index',
+          limit,
+        },
+      },
+      {
+        $lookup: {
+          from: 'likeposts',
+          localField: '_id',
+          foreignField: 'post',
+          as: 'likes',
+        },
+      },
+    ];
+
+    return await this.postModel.aggregate<PostWithLikes[]>(aggregationSteps);
   }
 
   async create(createPostDTO: CreatePostDTO, author: IdParam) {

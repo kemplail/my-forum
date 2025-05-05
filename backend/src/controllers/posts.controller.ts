@@ -16,6 +16,7 @@ import { UpdatePostDTO } from '../models/posts/dto/UpdatePostDTO';
 import { PostsService } from 'src/services/posts.service';
 import { CreatePostDTO } from '../models/posts/dto/CreatePostDTO';
 import { FindAllPostsDTO } from 'src/models/posts/dto/FindAllPostsDTO';
+import { SemanticSearchDTO } from 'src/models/posts/dto/SemanticSearchDTO';
 
 @Controller('posts')
 export class PostsController {
@@ -25,6 +26,11 @@ export class PostsController {
   async findAll(@Query() queryParams: FindAllPostsDTO) {
     const params = FindAllPostsDTO.toFindAllPostsParams(queryParams);
     return this.postsService.findAll(params);
+  }
+
+  @Get('/semantic-search')
+  async semanticSearch(@Query() queryParams: SemanticSearchDTO) {
+    return this.postsService.semanticSearch(queryParams);
   }
 
   @UseGuards(JwtAuthGuard)
