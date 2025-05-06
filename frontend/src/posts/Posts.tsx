@@ -7,15 +7,20 @@ import { useAppSelector } from "src/hooks";
 import { Location, useLocation } from "react-router-dom";
 import { SearchBar } from "src/searchbar/SearchBar";
 import { TextSearchPosts } from "./TextSearchPosts";
-import ToggleButton from "src/common/ToggleButton";
 import { SemanticSearchPosts } from "./SemanticSearchPosts";
+import TriStateToggle, { TriState } from "src/common/TriStateToggle";
+import { HybridSearchPosts } from "./HybridSearchPosts";
+
+type SearchMode = "text" | "semantic" | "hybrid";
 
 export function Posts() {
   const locationData: Location = useLocation();
 
   const [isOpen, setIsOpen] = useState(locationData.state ? true : false);
   const [query, setQuery] = useState<string>("");
-  const [searchMode, setSearchMode] = useState<"text" | "semantic">("text");
+  const [searchMode, setSearchMode] = useState<"text" | "semantic" | "hybrid">(
+    "text"
+  );
 
   const accesstoken = useAppSelector((state) => state.user.access_token);
 
@@ -27,11 +32,19 @@ export function Posts() {
     setIsOpen(false);
   }
 
-  function onToggle(isToggled: boolean) {
-    if (isToggled) {
-      setSearchMode("semantic");
+  function onToggle(state: TriState) {
+    const searchModes: SearchMode[] = ["text", "semantic", "hybrid"];
+
+    setSearchMode(searchModes[state]);
+  }
+
+  function showRightPostsComponent(searchMode: SearchMode, query: string) {
+    if (searchMode === "text" || query === "") {
+      return <TextSearchPosts query={query} />;
+    } else if (searchMode === "semantic") {
+      return <SemanticSearchPosts query={query} />;
     } else {
-      setSearchMode("text");
+      return <HybridSearchPosts query={query} />;
     }
   }
 
@@ -40,7 +53,7 @@ export function Posts() {
       <div className="flex items-center gap-x-16 mt-4 mb-4">
         <Title>Fil des posts</Title>
 
-        <ToggleButton label="Recherche sémantique" onToggle={onToggle} />
+        <TriStateToggle label="Méthode de recherche" onToggle={onToggle} />
         <SearchBar onSearch={(query: string) => setQuery(query)} />
 
         {accesstoken && (
@@ -54,11 +67,7 @@ export function Posts() {
         )}
       </div>
 
-      {searchMode === "text" || query === "" ? (
-        <TextSearchPosts query={query} />
-      ) : (
-        <SemanticSearchPosts query={query} />
-      )}
+      {showRightPostsComponent(searchMode, query)}
 
       <AddPostModal open={isOpen} close={closeModal} />
     </div>

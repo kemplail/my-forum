@@ -77,7 +77,7 @@ export class PostsService {
           sort: {
             score: {
               $meta: 'searchScore',
-              order: 1,
+              order: -1,
             },
             _id: 1,
           },
@@ -285,6 +285,14 @@ export class PostsService {
       { $unset: 'score' },
       {
         $limit: limit,
+      },
+      {
+        $lookup: {
+          from: 'likeposts',
+          localField: '_id',
+          foreignField: 'post',
+          as: 'likes',
+        },
       },
     ];
 
