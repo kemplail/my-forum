@@ -4,18 +4,23 @@ import { LikePost } from "src/types/likePost";
 import { LikePostForm } from "src/types/likePostForm";
 import { emptySplitApi } from "./emptySplitApi";
 
-type PaginationParams = {
+type TokenPaginationParams = {
   pageSize: number;
   paginationToken: string | null;
   direction: "before" | "after" | null;
 };
 
-type GetAllPostsParams = PaginationParams & {
+type GetAllPostsParams = TokenPaginationParams & {
   query: string | null;
 };
-type AdvancedSearchParams = {
+
+type ClassicPaginationToken = {
+  pageSize: number;
+  page: number;
+};
+
+type AdvancedSearchParams = ClassicPaginationToken & {
   query: string;
-  limit: number;
 };
 
 export const postApi = emptySplitApi.injectEndpoints({
@@ -40,11 +45,12 @@ export const postApi = emptySplitApi.injectEndpoints({
       },
       providesTags: ["Post", "LikePost"],
     }),
-    semanticSearch: builder.query<Post[], AdvancedSearchParams>({
-      query: ({ query, limit }) => {
+    semanticSearch: builder.query<PaginatedPosts, AdvancedSearchParams>({
+      query: ({ query, pageSize, page }) => {
         const params: string[] = [];
 
-        params.push(`limit=${limit}`);
+        params.push(`page=${page}`);
+        params.push(`pageSize=${pageSize}`);
         params.push(`query=${encodeURIComponent(query)}`);
 
         return {
@@ -54,13 +60,14 @@ export const postApi = emptySplitApi.injectEndpoints({
       },
       providesTags: ["Post", "LikePost"],
     }),
-    hybridSearch: builder.query<Post[], AdvancedSearchParams>({
-      query: ({ query, limit }) => {
+    hybridSearch: builder.query<PaginatedPosts, AdvancedSearchParams>({
+      query: ({ query, pageSize, page }) => {
         return {
           url: `posts/hybrid-search`,
           data: {
             query,
-            limit,
+            page,
+            pageSize,
           },
           method: "POST",
         };

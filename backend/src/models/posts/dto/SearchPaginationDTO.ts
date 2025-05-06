@@ -13,7 +13,7 @@ export class SearchPaginationDTO {
   @ApiPropertyOptional()
   @IsOptional()
   @IsInt()
-  @Min(0)
+  @Min(1)
   @Type(() => Number)
   pageSize?: number;
 

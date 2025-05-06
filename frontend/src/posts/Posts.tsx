@@ -7,9 +7,8 @@ import { useAppSelector } from "src/hooks";
 import { Location, useLocation } from "react-router-dom";
 import { SearchBar } from "src/searchbar/SearchBar";
 import { TextSearchPosts } from "./TextSearchPosts";
-import { SemanticSearchPosts } from "./SemanticSearchPosts";
 import TriStateToggle, { TriState } from "src/common/TriStateToggle";
-import { HybridSearchPosts } from "./HybridSearchPosts";
+import { AdvancedSearchPosts } from "./AdvancedSearchPosts";
 
 type SearchMode = "text" | "semantic" | "hybrid";
 
@@ -41,10 +40,8 @@ export function Posts() {
   function showRightPostsComponent(searchMode: SearchMode, query: string) {
     if (searchMode === "text" || query === "") {
       return <TextSearchPosts query={query} />;
-    } else if (searchMode === "semantic") {
-      return <SemanticSearchPosts query={query} />;
     } else {
-      return <HybridSearchPosts query={query} />;
+      return <AdvancedSearchPosts query={query} searchMode={searchMode} />;
     }
   }
 

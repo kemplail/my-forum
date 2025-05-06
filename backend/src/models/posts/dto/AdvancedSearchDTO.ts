@@ -12,5 +12,12 @@ export class AdvancedSearchDTO {
   @IsInt()
   @Min(0)
   @Type(() => Number)
-  limit: number;
+  pageSize?: number;
+
+  @ApiPropertyOptional()
+  @IsOptional()
+  @IsInt()
+  @Min(1)
+  @Type(() => Number)
+  page?: number;
 }

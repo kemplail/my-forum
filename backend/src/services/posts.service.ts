@@ -133,8 +133,9 @@ export class PostsService {
     };
   }
 
-  async semanticSearch({ query, limit = 10 }: AdvancedSearchDTO) {
+  async semanticSearch({ query, page = 1, pageSize = 10 }: AdvancedSearchDTO) {
     const vector = await this.vectorizeSearch(query);
+    const limit = 100;
     const numCandidates = limit * 30;
 
     const aggregationSteps: PipelineStage[] = [
@@ -148,31 +149,73 @@ export class PostsService {
         },
       },
       {
-        $lookup: {
-          from: 'likeposts',
-          localField: '_id',
-          foreignField: 'post',
-          as: 'likes',
+        $addFields: {
+          score: { $meta: 'vectorSearchScore' },
         },
       },
-      { $unset: 'vector' },
+      {
+        $match: {
+          score: { $gte: 0.9 },
+        },
+      },
+      {
+        $unset: 'score',
+      },
+      {
+        $facet: {
+          documents: [
+            { $skip: (page - 1) * pageSize },
+            { $limit: pageSize },
+            {
+              $unset: 'vector',
+            },
+            {
+              $lookup: {
+                from: 'likeposts',
+                localField: '_id',
+                foreignField: 'post',
+                as: 'likes',
+              },
+            },
+          ],
+          totalCount: [{ $count: 'totalCount' }],
+        },
+      },
+      {
+        $project: {
+          documents: 1,
+          meta: {
+            totalCount: {
+              $ifNull: [{ $arrayElemAt: ['$totalCount.totalCount', 0] }, 0],
+            },
+          },
+        },
+      },
     ];
 
-    return await this.postModel.aggregate<PostWithLikes[]>(aggregationSteps);
+    const [{ documents, meta } = { documents: [], meta: { totalCount: 0 } }] =
+      await this.postModel.aggregate<PaginatedPostWithLikes>(aggregationSteps);
+
+    return { documents, meta };
   }
 
   async hybridSearch({
     query,
-    limit = 10,
+    page = 1,
+    pageSize = 10,
     weights = {
-      text: 0.7,
-      semantic: 0.3,
+      text: 0.6,
+      semantic: 0.4,
     },
   }: HybridSearchDTO) {
+    const limit = 100;
     const intermediateLimit = limit * 2;
 
     const vector = await this.vectorizeSearch(query);
     const numCandidates = intermediateLimit * 30;
+    const constant = 60;
+
+    const minScore = 0.0055;
 
     const firstGroupStep = {
       $group: {
@@ -211,7 +254,7 @@ export class PostsService {
       this.addRRFScoreStep({
         fieldName: 'vs_score',
         weight: weights.semantic,
-        constant: 60,
+        constant,
       }),
       {
         $project: {
@@ -282,21 +325,52 @@ export class PostsService {
           score: -1,
         },
       },
+      {
+        $match: {
+          score: { $gte: minScore },
+        },
+      },
       { $unset: 'score' },
       {
         $limit: limit,
       },
       {
-        $lookup: {
-          from: 'likeposts',
-          localField: '_id',
-          foreignField: 'post',
-          as: 'likes',
+        $facet: {
+          documents: [
+            { $skip: (page - 1) * pageSize },
+            { $limit: pageSize },
+            {
+              $lookup: {
+                from: 'likeposts',
+                localField: '_id',
+                foreignField: 'post',
+                as: 'likes',
+              },
+            },
+          ],
+          totalCount: [
+            {
+              $count: 'totalCount',
+            },
+          ],
+        },
+      },
+      {
+        $project: {
+          documents: 1,
+          meta: {
+            totalCount: {
+              $ifNull: [{ $arrayElemAt: ['$totalCount.totalCount', 0] }, 0],
+            },
+          },
         },
       },
     ];
 
-    return await this.postModel.aggregate<PostWithLikes[]>(aggregationSteps);
+    const [{ documents, meta } = { documents: [], meta: { totalCount: 0 } }] =
+      await this.postModel.aggregate<PaginatedPostWithLikes>(aggregationSteps);
+
+    return { documents, meta };
   }
 
   addRRFScoreStep({
