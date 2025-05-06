@@ -16,7 +16,8 @@ import { UpdatePostDTO } from '../models/posts/dto/UpdatePostDTO';
 import { PostsService } from 'src/services/posts.service';
 import { CreatePostDTO } from '../models/posts/dto/CreatePostDTO';
 import { FindAllPostsDTO } from 'src/models/posts/dto/FindAllPostsDTO';
-import { SemanticSearchDTO } from 'src/models/posts/dto/SemanticSearchDTO';
+import { AdvancedSearchDTO } from 'src/models/posts/dto/AdvancedSearchDTO';
+import { HybridSearchDTO } from 'src/models/posts/dto/HybridSearchDTO';
 
 @Controller('posts')
 export class PostsController {
@@ -29,8 +30,13 @@ export class PostsController {
   }
 
   @Get('/semantic-search')
-  async semanticSearch(@Query() queryParams: SemanticSearchDTO) {
+  async semanticSearch(@Query() queryParams: AdvancedSearchDTO) {
     return this.postsService.semanticSearch(queryParams);
+  }
+
+  @Post('/hybrid-search')
+  async hybridSearch(@Body() body: HybridSearchDTO) {
+    return this.postsService.hybridSearch(body);
   }
 
   @UseGuards(JwtAuthGuard)

@@ -2,7 +2,7 @@ import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { Type } from 'class-transformer';
 import { IsInt, IsOptional, IsString, Min } from 'class-validator';
 
-export class SemanticSearchDTO {
+export class AdvancedSearchDTO {
   @ApiProperty()
   @IsString()
   query: string;

@@ -14,6 +14,8 @@ import { EventEmitter2 } from '@nestjs/event-emitter';
 import { PostDeletedEvent } from 'src/events/PostDeletedEvent';
 import { HttpService } from '@nestjs/axios';
 import { lastValueFrom } from 'rxjs';
+import { AdvancedSearchDTO } from 'src/models/posts/dto/AdvancedSearchDTO';
+import { HybridSearchDTO } from 'src/models/posts/dto/HybridSearchDTO';
 
 const DEFAULT_PAGE_SIZE = 10;
 
@@ -131,36 +133,8 @@ export class PostsService {
     };
   }
 
-  async semanticSearch({
-    query,
-    limit = 10,
-  }: {
-    query: string;
-    limit: number;
-  }) {
-    let vector: number[];
-
-    try {
-      const response = await lastValueFrom(
-        this.httpService.post<{ vector: number[] }>(
-          `${process.env.SEMANTIC_SEARCH_API_URL}/vectorize-search`,
-          {
-            text: query,
-          },
-        ),
-      );
-
-      vector = response.data.vector;
-    } catch (e) {
-      throw new Error(
-        `An error occured when trying to call semantic search api : ${e}`,
-      );
-    }
-
-    if (!vector) {
-      throw new Error('Vector not defined');
-    }
-
+  async semanticSearch({ query, limit = 10 }: AdvancedSearchDTO) {
+    const vector = await this.vectorizeSearch(query);
     const numCandidates = limit * 30;
 
     const aggregationSteps: PipelineStage[] = [
@@ -185,6 +159,191 @@ export class PostsService {
     ];
 
     return await this.postModel.aggregate<PostWithLikes[]>(aggregationSteps);
+  }
+
+  async hybridSearch({
+    query,
+    limit = 10,
+    weights = {
+      text: 0.7,
+      semantic: 0.3,
+    },
+  }: HybridSearchDTO) {
+    const intermediateLimit = limit * 2;
+
+    const vector = await this.vectorizeSearch(query);
+    const numCandidates = intermediateLimit * 30;
+
+    const firstGroupStep = {
+      $group: {
+        _id: null,
+        docs: { $push: '$$ROOT' },
+      },
+    };
+
+    const unwindStep = {
+      $unwind: {
+        path: '$docs',
+        includeArrayIndex: 'rank',
+      },
+    };
+
+    const docsInformationRetrieval = {
+      _id: '$docs._id',
+      author: '$docs.author',
+      text: '$docs.text',
+      title: '$docs.title',
+      date: '$docs.date',
+    };
+
+    const aggregationSteps: PipelineStage[] = [
+      {
+        $vectorSearch: {
+          queryVector: vector,
+          path: 'vector',
+          numCandidates,
+          index: 'vector_index',
+          limit: intermediateLimit,
+        },
+      },
+      firstGroupStep,
+      unwindStep,
+      this.addRRFScoreStep({
+        fieldName: 'vs_score',
+        weight: weights.semantic,
+        constant: 60,
+      }),
+      {
+        $project: {
+          ...docsInformationRetrieval,
+          vs_score: 1,
+        },
+      },
+      {
+        $unionWith: {
+          coll: 'posts',
+          pipeline: [
+            {
+              $search: {
+                phrase: {
+                  query: query,
+                  path: ['title', 'text'],
+                  slop: 2,
+                },
+              },
+            },
+            {
+              $limit: intermediateLimit,
+            },
+            firstGroupStep,
+            unwindStep,
+            this.addRRFScoreStep({
+              fieldName: 'ts_score',
+              weight: weights.text,
+              constant: 60,
+            }),
+            {
+              $project: {
+                ...docsInformationRetrieval,
+                ts_score: 1,
+              },
+            },
+          ],
+        },
+      },
+      {
+        $group: {
+          _id: '$_id',
+          title: { $first: '$title' },
+          author: { $first: '$author' },
+          text: { $first: '$text' },
+          date: { $first: '$date' },
+          vs_score: { $max: '$vs_score' },
+          ts_score: { $max: '$ts_score' },
+        },
+      },
+      {
+        $project: {
+          _id: 1,
+          title: 1,
+          author: 1,
+          text: 1,
+          date: 1,
+          score: {
+            $add: [
+              { $ifNull: ['$vs_score', 0] },
+              { $ifNull: ['$ts_score', 0] },
+            ],
+          },
+        },
+      },
+      {
+        $sort: {
+          score: -1,
+        },
+      },
+      { $unset: 'score' },
+      {
+        $limit: limit,
+      },
+    ];
+
+    return await this.postModel.aggregate<PostWithLikes[]>(aggregationSteps);
+  }
+
+  addRRFScoreStep({
+    fieldName,
+    weight,
+    constant,
+  }: {
+    fieldName: 'vs_score' | 'ts_score';
+    weight: number;
+    constant: number;
+  }) {
+    return {
+      $addFields: {
+        [fieldName]: {
+          $multiply: [
+            weight,
+            {
+              $divide: [
+                1.0,
+                {
+                  $add: ['$rank', constant],
+                },
+              ],
+            },
+          ],
+        },
+      },
+    };
+  }
+
+  async vectorizeSearch(text: string): Promise<number[]> {
+    let vector: number[];
+
+    try {
+      const response = await lastValueFrom(
+        this.httpService.post<{ vector: number[] }>(
+          `${process.env.SEMANTIC_SEARCH_API_URL}/vectorize-search`,
+          {
+            text,
+          },
+        ),
+      );
+
+      vector = response.data.vector;
+    } catch (e) {
+      throw new Error(
+        `An error occured when trying to call semantic search api : ${e}`,
+      );
+    }
+
+    if (!vector) {
+      throw new Error('Vector not defined');
+    }
+
+    return vector;
   }
 
   async create(createPostDTO: CreatePostDTO, author: IdParam) {
