@@ -1,69 +1,23 @@
-import { useEffect, useMemo, useState } from "react";
-import { PostElement } from "./PostElement";
+import { useState } from "react";
 import Title from "../textelements/Title";
 import AddPostModal from "../modals/AddPostModal";
-import { Post } from "../types/post";
-import { useGetAllPostsQuery } from "../store/rtk/post";
 
 import { PlusSmIcon } from "@heroicons/react/solid";
 import { useAppSelector } from "src/hooks";
-import { useLocation } from "react-router-dom";
-import { PaginationBar } from "src/paginationbar/PaginationBar";
+import { Location, useLocation } from "react-router-dom";
 import { SearchBar } from "src/searchbar/SearchBar";
-
-const ITEMS_PER_PAGE = 10;
+import { TextSearchPosts } from "./TextSearchPosts";
+import ToggleButton from "src/common/ToggleButton";
+import { SemanticSearchPosts } from "./SemanticSearchPosts";
 
 export function Posts() {
-  const locationData: { state: any } = useLocation();
+  const locationData: Location = useLocation();
 
   const [isOpen, setIsOpen] = useState(locationData.state ? true : false);
-  const [page, setPage] = useState(1);
   const [query, setQuery] = useState<string>("");
-  const [paginationToken, setPaginationToken] = useState<string | null>(null);
-  const [direction, setDirection] = useState<"before" | "after" | null>(null);
-
-  const { data, isLoading } = useGetAllPostsQuery({
-    pageSize: ITEMS_PER_PAGE,
-    query,
-    paginationToken,
-    direction,
-  });
-
-  useEffect(() => {
-    setPaginationToken(null);
-    setDirection(null);
-    setPage(1);
-  }, [query]);
-
-  const { firstToken, lastToken } = useMemo(() => {
-    if (data && data.documents.length >= 1) {
-      return {
-        firstToken: data.documents[0].paginationToken,
-        lastToken: data.documents[data.documents.length - 1].paginationToken,
-      };
-    }
-    return { firstToken: null, lastToken: null };
-  }, [data]);
+  const [searchMode, setSearchMode] = useState<"text" | "semantic">("text");
 
   const accesstoken = useAppSelector((state) => state.user.access_token);
-
-  function goToNextPage() {
-    setPaginationToken(lastToken);
-    setDirection("after");
-    setPage((previousPage) => previousPage + 1);
-  }
-
-  function goToPreviousPage() {
-    setPaginationToken(firstToken);
-    setDirection("before");
-    setPage((prev) => Math.max(prev - 1, 1));
-  }
-
-  function showPosts() {
-    return data?.documents.map((element: Post) => {
-      return <PostElement key={element._id} post={element} />;
-    });
-  }
 
   function openModal() {
     setIsOpen(true);
@@ -73,37 +27,40 @@ export function Posts() {
     setIsOpen(false);
   }
 
+  function onToggle(isToggled: boolean) {
+    if (isToggled) {
+      setSearchMode("semantic");
+    } else {
+      setSearchMode("text");
+    }
+  }
+
   return (
     <div className="posts ">
-      <div className="flex">
+      <div className="flex items-center gap-x-16 mt-4 mb-4">
         <Title>Fil des posts</Title>
 
+        <ToggleButton label="Recherche sémantique" onToggle={onToggle} />
         <SearchBar onSearch={(query: string) => setQuery(query)} />
 
         {accesstoken && (
           <button
             onClick={openModal}
-            className="whitespace-nowrap mt-4 ml-auto flex bg-blue-500 hover:bg-blue-700 text-white font-bold rounded h-10 p-2 ml-4"
+            className="whitespace-nowrap ml-auto flex bg-blue-500 hover:bg-blue-700 text-white font-bold rounded h-10 p-2 ml-4"
           >
             <PlusSmIcon className="w-5 h-5" />
             Ajouter un post
           </button>
         )}
       </div>
-      <div className="grid grid-cols-2 gap-2">
-        {!isLoading ? showPosts() : <span>Loading...</span>}
-      </div>
+
+      {searchMode === "text" || query === "" ? (
+        <TextSearchPosts query={query} />
+      ) : (
+        <SemanticSearchPosts query={query} />
+      )}
 
       <AddPostModal open={isOpen} close={closeModal} />
-
-      <PaginationBar
-        onPrevious={goToPreviousPage}
-        onNext={goToNextPage}
-        page={page}
-        totalCount={data?.meta.totalCount}
-        dataIsLoading={isLoading}
-        itemsPerPage={ITEMS_PER_PAGE}
-      />
     </div>
   );
 }

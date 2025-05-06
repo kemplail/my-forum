@@ -23,7 +23,7 @@ export function SearchBar({
   }, [debouncedQuery, onSearch]);
 
   return (
-    <div className="w-full p-4">
+    <div className="w-full">
       <input
         type="text"
         value={query}

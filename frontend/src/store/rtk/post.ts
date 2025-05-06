@@ -13,6 +13,10 @@ type PaginationParams = {
 type GetAllPostsParams = PaginationParams & {
   query: string | null;
 };
+type SemanticSearchParams = {
+  query: string;
+  limit: number;
+};
 
 export const postApi = emptySplitApi.injectEndpoints({
   endpoints: (builder) => ({
@@ -31,6 +35,20 @@ export const postApi = emptySplitApi.injectEndpoints({
 
         return {
           url: `posts?${params.join("&")}`,
+          method: "GET",
+        };
+      },
+      providesTags: ["Post", "LikePost"],
+    }),
+    semanticSearch: builder.query<Post[], SemanticSearchParams>({
+      query: ({ query, limit }) => {
+        const params: string[] = [];
+
+        params.push(`limit=${limit}`);
+        if (query) params.push(`query=${encodeURIComponent(query)}`);
+
+        return {
+          url: `posts/semantic-search?${params.join("&")}`,
           method: "GET",
         };
       },
@@ -95,6 +113,7 @@ export const postApi = emptySplitApi.injectEndpoints({
 
 export const {
   useGetAllPostsQuery,
+  useSemanticSearchQuery,
   useAddPostMutation,
   useUpdatePostMutation,
   useDeletePostMutation,
