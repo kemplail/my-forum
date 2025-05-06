@@ -91,6 +91,9 @@ export class PostsService {
         $limit: pageSize,
       },
       {
+        $unset: 'vector',
+      },
+      {
         $addFields: {
           meta: { totalCount: '$$SEARCH_META.count.total' },
           paginationToken: { $meta: 'searchSequenceToken' },
@@ -330,7 +333,7 @@ export class PostsService {
           score: { $gte: minScore },
         },
       },
-      { $unset: 'score' },
+      { $unset: ['score', 'vector'] },
       {
         $limit: limit,
       },
