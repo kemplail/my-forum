@@ -108,6 +108,17 @@ export class PostsService {
         },
       },
       {
+        $lookup: {
+          from: 'users',
+          localField: 'author',
+          foreignField: '_id',
+          as: 'author',
+        },
+      },
+      {
+        $unwind: '$author',
+      },
+      {
         $group: {
           _id: null,
           documents: { $push: '$$ROOT' },
@@ -122,6 +133,7 @@ export class PostsService {
       {
         $project: {
           _id: 0,
+          'documents.author.password': 0,
         },
       },
     ];
@@ -178,6 +190,22 @@ export class PostsService {
                 localField: '_id',
                 foreignField: 'post',
                 as: 'likes',
+              },
+            },
+            {
+              $lookup: {
+                from: 'users',
+                localField: 'author',
+                foreignField: '_id',
+                as: 'author',
+              },
+            },
+            {
+              $unwind: '$author',
+            },
+            {
+              $project: {
+                'author.password': 0,
               },
             },
           ],
@@ -348,6 +376,22 @@ export class PostsService {
                 localField: '_id',
                 foreignField: 'post',
                 as: 'likes',
+              },
+            },
+            {
+              $lookup: {
+                from: 'users',
+                localField: 'author',
+                foreignField: '_id',
+                as: 'author',
+              },
+            },
+            {
+              $unwind: '$author',
+            },
+            {
+              $project: {
+                'author.password': 0,
               },
             },
           ],
