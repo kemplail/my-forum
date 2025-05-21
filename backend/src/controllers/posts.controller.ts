@@ -9,7 +9,6 @@ import {
   UseGuards,
   Request,
   Query,
-  BadRequestException,
 } from '@nestjs/common';
 import { JwtAuthGuard } from 'src/auth/jwt-auth.guards';
 import { IdParam } from 'src/models/IdParam';
@@ -45,20 +44,7 @@ export class PostsController {
 
   @Get('/parse')
   async parseQuery(@Query() queryParams: SearchDTO) {
-    let query: LogicalCondition;
-    try {
-      query = parse(queryParams.query);
-    } catch (e) {
-      if (e instanceof SyntaxError) {
-        throw new BadRequestException(
-          SyntaxError.buildMessage(e.expected, e.found),
-        );
-      }
-
-      throw e;
-    }
-
-    return await this.postsService.advancedSearch(query);
+    return await this.postsService.advancedSearch(queryParams.query);
   }
 
   @UseGuards(JwtAuthGuard)

@@ -1,4 +1,8 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import {
+  BadRequestException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { CreatePostDTO } from '../models/posts/dto/CreatePostDTO';
 import { UpdatePostDTO } from '../models/posts/dto/UpdatePostDTO';
@@ -25,6 +29,8 @@ import {
   mongoSearchOperatorMap,
   transformParsedQueryToMongoQuery,
 } from 'src/utils/parser.utils';
+import { parse } from 'src/parser/grammar';
+import { SyntaxError } from 'src/parser/grammar';
 
 const DEFAULT_PAGE_SIZE = 10;
 
@@ -50,10 +56,23 @@ export class PostsService {
     private httpService: HttpService,
   ) {}
 
-  async advancedSearch(query: LogicalCondition) {
+  async advancedSearch(query: string) {
+    let parsedQuery: LogicalCondition;
+    try {
+      parsedQuery = parse(query);
+    } catch (e) {
+      if (e instanceof SyntaxError) {
+        throw new BadRequestException(
+          SyntaxError.buildMessage(e.expected, e.found),
+        );
+      }
+
+      throw e;
+    }
+
     const mongoQuery = transformParsedQueryToMongoQuery({
-      conditions: query.conditions,
-      operatorToApply: query.operator,
+      conditions: parsedQuery.conditions,
+      operatorToApply: parsedQuery.operator,
     });
 
     return mongoQuery;
