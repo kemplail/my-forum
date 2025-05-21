@@ -9,6 +9,7 @@ import {
   UseGuards,
   Request,
   Query,
+  BadRequestException,
 } from '@nestjs/common';
 import { JwtAuthGuard } from 'src/auth/jwt-auth.guards';
 import { IdParam } from 'src/models/IdParam';
@@ -18,6 +19,9 @@ import { CreatePostDTO } from '../models/posts/dto/CreatePostDTO';
 import { FindAllPostsDTO } from 'src/models/posts/dto/FindAllPostsDTO';
 import { AdvancedSearchDTO } from 'src/models/posts/dto/AdvancedSearchDTO';
 import { HybridSearchDTO } from 'src/models/posts/dto/HybridSearchDTO';
+import { parse, SyntaxError } from 'src/parser/grammar';
+import { SearchDTO } from 'src/models/posts/dto/SearchDTO';
+import { LogicalCondition } from 'src/parser/types';
 
 @Controller('posts')
 export class PostsController {
@@ -37,6 +41,24 @@ export class PostsController {
   @Post('/hybrid-search')
   async hybridSearch(@Body() body: HybridSearchDTO) {
     return this.postsService.hybridSearch(body);
+  }
+
+  @Get('/parse')
+  parseQuery(@Query() queryParams: SearchDTO) {
+    let query: LogicalCondition;
+    try {
+      query = parse(queryParams.query);
+    } catch (e) {
+      if (e instanceof SyntaxError) {
+        throw new BadRequestException(
+          SyntaxError.buildMessage(e.expected, e.found),
+        );
+      }
+
+      throw e;
+    }
+
+    return query;
   }
 
   @UseGuards(JwtAuthGuard)
