@@ -18,9 +18,7 @@ import { CreatePostDTO } from '../models/posts/dto/CreatePostDTO';
 import { FindAllPostsDTO } from 'src/models/posts/dto/FindAllPostsDTO';
 import { AdvancedSearchDTO } from 'src/models/posts/dto/AdvancedSearchDTO';
 import { HybridSearchDTO } from 'src/models/posts/dto/HybridSearchDTO';
-import { parse, SyntaxError } from 'src/parser/grammar';
 import { SearchDTO } from 'src/models/posts/dto/SearchDTO';
-import { LogicalCondition } from 'src/parser/types';
 
 @Controller('posts')
 export class PostsController {
