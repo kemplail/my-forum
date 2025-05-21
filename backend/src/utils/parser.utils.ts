@@ -31,77 +31,93 @@ export type CompoundBasicOperator = 'must' | 'should';
 
 // Permet d'avoir :
 // {
-//   should: [...]
+//   compound: {
+//     should: [...]
+//   }
 // }
-// OU (mais pas les 2)
+// OU
 // {
-//   mustl: [...]
+//   compound: {
+//     must: [...]
+//   }
 // }
 type CompoundClause<operator extends CompoundBasicOperator> = {
-  [key in operator]: (MongoSearchOperator | MongoSearchQuery)[];
-} & {
-  [otherKey in Exclude<CompoundBasicOperator, operator>]?: never;
+  compound: {
+    [key in operator]: (MongoSearchOperator | AdvancedMongoSearchQuery)[];
+  } & {
+    [otherKey in Exclude<CompoundBasicOperator, operator>]?: never;
+  };
 };
 
-type MongoSearchQuery = CompoundClause<'must'> | CompoundClause<'should'>;
+type AdvancedMongoSearchQuery =
+  | CompoundClause<'must'>
+  | CompoundClause<'should'>;
 
 // Exemple : (roulement sphérique "presse hydraulique" OR "obus * explosif" industrie) -artillerie
-const example: MongoSearchQuery = {
-  must: [
-    {
-      should: [
-        {
-          must: [
+const example: AdvancedMongoSearchQuery = {
+  compound: {
+    must: [
+      {
+        compound: {
+          should: [
             {
-              text: {
-                path: 'text',
-                query: 'roulement',
+              compound: {
+                must: [
+                  {
+                    text: {
+                      path: 'text',
+                      query: 'roulement',
+                    },
+                  },
+                  {
+                    text: {
+                      path: 'text',
+                      query: 'sphérique',
+                    },
+                  },
+                  {
+                    phrase: {
+                      path: 'text',
+                      query: 'presse hydraulique',
+                    },
+                  },
+                ],
               },
             },
             {
-              text: {
-                path: 'text',
-                query: 'sphérique',
-              },
-            },
-            {
-              phrase: {
-                path: 'text',
-                query: 'presse hydraulique',
+              compound: {
+                must: [
+                  {
+                    phrase: {
+                      path: 'text',
+                      slop: 3,
+                      query: 'obus explosif',
+                    },
+                  },
+                  {
+                    text: {
+                      path: 'text',
+                      query: 'industrie',
+                    },
+                  },
+                ],
               },
             },
           ],
         },
-        {
-          must: [
-            {
-              phrase: {
-                path: 'text',
-                slop: 3,
-                query: 'obus explosif',
-              },
+      },
+      {
+        compound: {
+          mustNot: {
+            text: {
+              path: 'text',
+              query: 'artillerie',
             },
-            {
-              text: {
-                path: 'text',
-                query: 'industrie',
-              },
-            },
-          ],
-        },
-      ],
-    },
-    {
-      compound: {
-        mustNot: {
-          text: {
-            path: 'text',
-            query: 'artillerie',
           },
         },
       },
-    },
-  ],
+    ],
+  },
 };
 
 const sanitizeQuery = (value: string) =>
@@ -146,7 +162,7 @@ export function transformParsedQueryToMongoQuery({
   conditions: (LogicalCondition | AtomicCondition)[];
   operatorToApply?: LogicalOperator;
 }) {
-  let compound = {};
+  let compoundObject = { compound: {} };
   const operatorKey: CompoundBasicOperator =
     operatorToApply === 'AND' ? 'must' : 'should';
 
@@ -159,11 +175,11 @@ export function transformParsedQueryToMongoQuery({
             operatorToApply: condition.operator,
           });
 
-    compound = {
-      ...compound,
-      [operatorKey]: [...(compound[operatorKey] ?? []), entry],
+    compoundObject.compound = {
+      ...compoundObject.compound,
+      [operatorKey]: [...(compoundObject.compound[operatorKey] ?? []), entry],
     };
   }
 
-  return compound;
+  return compoundObject;
 }
