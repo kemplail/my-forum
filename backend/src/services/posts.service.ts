@@ -75,7 +75,16 @@ export class PostsService {
       operatorToApply: parsedQuery.operator,
     });
 
-    return mongoQuery;
+    const res = await this.postModel.aggregate([
+      {
+        $search: mongoQuery,
+      },
+      {
+        $unset: 'vector',
+      },
+    ]);
+
+    return res;
   }
 
   async findAll({
