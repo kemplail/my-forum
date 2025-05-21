@@ -44,7 +44,7 @@ export class PostsController {
   }
 
   @Get('/parse')
-  parseQuery(@Query() queryParams: SearchDTO) {
+  async parseQuery(@Query() queryParams: SearchDTO) {
     let query: LogicalCondition;
     try {
       query = parse(queryParams.query);
@@ -58,7 +58,7 @@ export class PostsController {
       throw e;
     }
 
-    return query;
+    return await this.postsService.advancedSearch(query);
   }
 
   @UseGuards(JwtAuthGuard)

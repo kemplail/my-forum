@@ -1,4 +1,4 @@
-{
+{{
   function wrapAND(terms) {
     if (terms.length === 1) return terms[0];
     return { operator: "AND", conditions: terms };
@@ -7,13 +7,14 @@
   function isWildcardPhrase(content) {
     return content.includes("*");
   }
-}
+}}
 
 Start
-  = _ expr:OrExpr _ { return expr; }
+  = _ expr:OrExpr _ { return expr ; }
 
 OrExpr
-  = first:AndGroup rest:(_ OrKeyword _ AndGroup)+ {
+  = first:AndGroup rest:(_ OrKeyword _ AndGroup)* {
+      if (rest.length === 0) return first;
       return {
         operator: "OR",
         conditions: [first, ...rest.map(r => r[3])]
@@ -31,13 +32,16 @@ Group
 
 Not
   = "-" _ t:(Word) {
-      return { type: "exclusion", value: t.value };
+      return { type: "exclusion", value: t.value ?? t };
   }
 
 Phrase
-  = Quote parts:(WordPart (RequiredSpace WordPart)*) Quote {
-      const firstWord = parts[0];
-      const nextWords = parts[1].map(pair => pair[1]);
+  = q:Quote parts:(WordPart (RequiredSpace WordPart)*) Quote {
+  	  // Le premier mot est le premier élément de l'array
+  	  const firstWord = parts[0]
+      // Tous les autres mots sont dans une array qui est à l'index 1
+      const nextWords = parts[1].map(pair => pair[1])
+      
       const words = [firstWord, ...nextWords];
       const value = words.join(" ");
       
@@ -48,10 +52,12 @@ Phrase
       }
   }
 
+// !OrKeyword : permet de vérifier que le mot n'est pas un orKeyword
 Word
-  = !{ w.toUpperCase() === "OR" } w:SimpleWord { return { type: "text", value: w }; }
+  = !OrKeyword w:SimpleWord { return { type: "text", value: w }; }
 
-// "OR" comme opérateur logique : doit être exact et non suivi d'autres lettres/chiffres
+// i : non sensible à la casse
+// ![a-zA-Z0-9] : permet d'empêcher de matcher les mots qui commencent par "or"
 OrKeyword
   = "OR"i ![a-zA-Z0-9]
 
@@ -59,12 +65,15 @@ OrKeyword
 WordPart
   = SimpleWord / "*"
 
+// 1,n caractères parmi ceux définis entre []
+// par défaut, renvoit chaque caractère comme élément d'une array
 SimpleWord
   = chars:[a-zA-Z0-9éèàùçôîêâû_-]+ { return chars.join(""); }
 
 Quote
   = "\""
 
+// 0,1,n répétitions d'un espace
 _ = [ ]*
 
 RequiredSpace = [ ]+

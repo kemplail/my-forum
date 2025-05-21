@@ -1,8 +1,13 @@
-type Operator = 'OR' | 'AND';
-type AtomicConditionType = 'text' | 'exactText' | 'wildCardText' | 'exclusion';
+export type LogicalOperator = 'OR' | 'AND';
+
+export type AtomicConditionType =
+  | 'text'
+  | 'exactText'
+  | 'wildCardText'
+  | 'exclusion';
 
 export type LogicalCondition = {
-  operator: Operator;
+  operator: LogicalOperator;
   conditions: (LogicalCondition | AtomicCondition)[];
 };
 

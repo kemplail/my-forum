@@ -7,7 +7,6 @@ import {
   PaginatedPostWithLikes,
   Post,
   PostDocument,
-  PostWithLikes,
 } from '../models/posts/posts.schema';
 import { IdParam } from '../models/IdParam';
 import { EventEmitter2 } from '@nestjs/event-emitter';
@@ -16,6 +15,16 @@ import { HttpService } from '@nestjs/axios';
 import { lastValueFrom } from 'rxjs';
 import { AdvancedSearchDTO } from 'src/models/posts/dto/AdvancedSearchDTO';
 import { HybridSearchDTO } from 'src/models/posts/dto/HybridSearchDTO';
+import {
+  AtomicCondition,
+  LogicalCondition,
+  LogicalOperator,
+} from 'src/parser/types';
+import {
+  CompoundBasicOperator,
+  mongoSearchOperatorMap,
+  transformParsedQueryToMongoQuery,
+} from 'src/utils/parser.utils';
 
 const DEFAULT_PAGE_SIZE = 10;
 
@@ -40,6 +49,15 @@ export class PostsService {
     private eventEmitter: EventEmitter2,
     private httpService: HttpService,
   ) {}
+
+  async advancedSearch(query: LogicalCondition) {
+    const mongoQuery = transformParsedQueryToMongoQuery({
+      conditions: query.conditions,
+      operatorToApply: query.operator,
+    });
+
+    return mongoQuery;
+  }
 
   async findAll({
     query,

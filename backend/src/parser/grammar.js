@@ -4,6 +4,16 @@
 
 "use strict";
 
+
+  function wrapAND(terms) {
+    if (terms.length === 1) return terms[0];
+    return { operator: "AND", conditions: terms };
+  }
+
+  function isWildcardPhrase(content) {
+    return content.includes("*");
+  }
+
 class peg$SyntaxError extends SyntaxError {
   constructor(message, expected, found, location) {
     super(message);
@@ -186,8 +196,9 @@ function peg$parse(input, options) {
   const peg$e7 = peg$literalExpectation("\"", false);
   const peg$e8 = peg$classExpectation([" "], false, false, false);
 
-  function peg$f0(expr) {    return expr;  }
+  function peg$f0(expr) {    return expr ;  }
   function peg$f1(first, rest) {
+    if (rest.length === 0) return first;
     return {
       operator: "OR",
       conditions: [first, ...rest.map(r => r[3])]
@@ -197,23 +208,25 @@ function peg$parse(input, options) {
   function peg$f3(t) {    return t;  }
   function peg$f4(expr) {    return expr;  }
   function peg$f5(t) {
-    return { type: "exclusion", value: t.value };
+    return { type: "exclusion", value: t.value ?? t };
   }
-  function peg$f6(parts) {
-    const firstWord = parts[0];
-    const nextWords = parts[1].map(pair => pair[1]);
-    const words = [firstWord, ...nextWords];
-    const value = words.join(" ");
-    
-    if (words.includes("*")) {
-      return { type: "wildCardText", value };
-    } else {
-      return { type: "exactText", value };
-    }
+  function peg$f6(q, parts) {
+    // Le premier mot est le premier élément de l'array
+    const firstWord = parts[0]
+      // Tous les autres mots sont dans une array qui est à l'index 1
+      const nextWords = parts[1].map(pair => pair[1])
+      
+      const words = [firstWord, ...nextWords];
+      const value = words.join(" ");
+      
+      if (words.includes("*")) {
+        return { type: "wildCardText", value };
+      } else {
+        return { type: "exactText", value };
+      }
   }
-  function peg$f7() {    w.toUpperCase() === "OR"  }
-  function peg$f8(w) {    return { type: "text", value: w };  }
-  function peg$f9(chars) {    return chars.join("");  }
+  function peg$f7(w) {    return { type: "text", value: w };  }
+  function peg$f8(chars) {    return chars.join("");  }
   let peg$currPos = options.peg$currPos | 0;
   let peg$savedPos = peg$currPos;
   const peg$posDetailsCache = [{ line: 1, column: 1 }];
@@ -426,37 +439,28 @@ function peg$parse(input, options) {
         peg$currPos = s3;
         s3 = peg$FAILED;
       }
-      if (s3 !== peg$FAILED) {
-        while (s3 !== peg$FAILED) {
-          s2.push(s3);
-          s3 = peg$currPos;
-          s4 = peg$parse_();
-          s5 = peg$parseOrKeyword();
-          if (s5 !== peg$FAILED) {
-            s6 = peg$parse_();
-            s7 = peg$parseAndGroup();
-            if (s7 !== peg$FAILED) {
-              s4 = [s4, s5, s6, s7];
-              s3 = s4;
-            } else {
-              peg$currPos = s3;
-              s3 = peg$FAILED;
-            }
+      while (s3 !== peg$FAILED) {
+        s2.push(s3);
+        s3 = peg$currPos;
+        s4 = peg$parse_();
+        s5 = peg$parseOrKeyword();
+        if (s5 !== peg$FAILED) {
+          s6 = peg$parse_();
+          s7 = peg$parseAndGroup();
+          if (s7 !== peg$FAILED) {
+            s4 = [s4, s5, s6, s7];
+            s3 = s4;
           } else {
             peg$currPos = s3;
             s3 = peg$FAILED;
           }
+        } else {
+          peg$currPos = s3;
+          s3 = peg$FAILED;
         }
-      } else {
-        s2 = peg$FAILED;
       }
-      if (s2 !== peg$FAILED) {
-        peg$savedPos = s0;
-        s0 = peg$f1(s1, s2);
-      } else {
-        peg$currPos = s0;
-        s0 = peg$FAILED;
-      }
+      peg$savedPos = s0;
+      s0 = peg$f1(s1, s2);
     } else {
       peg$currPos = s0;
       s0 = peg$FAILED;
@@ -639,7 +643,7 @@ function peg$parse(input, options) {
         s3 = peg$parseQuote();
         if (s3 !== peg$FAILED) {
           peg$savedPos = s0;
-          s0 = peg$f6(s2);
+          s0 = peg$f6(s1, s2);
         } else {
           peg$currPos = s0;
           s0 = peg$FAILED;
@@ -660,18 +664,21 @@ function peg$parse(input, options) {
     let s0, s1, s2;
 
     s0 = peg$currPos;
-    peg$savedPos = peg$currPos;
-    s1 = peg$f7();
-    if (s1) {
-      s1 = peg$FAILED;
-    } else {
+    s1 = peg$currPos;
+    peg$silentFails++;
+    s2 = peg$parseOrKeyword();
+    peg$silentFails--;
+    if (s2 === peg$FAILED) {
       s1 = undefined;
+    } else {
+      peg$currPos = s1;
+      s1 = peg$FAILED;
     }
     if (s1 !== peg$FAILED) {
       s2 = peg$parseSimpleWord();
       if (s2 !== peg$FAILED) {
         peg$savedPos = s0;
-        s0 = peg$f8(s2);
+        s0 = peg$f7(s2);
       } else {
         peg$currPos = s0;
         s0 = peg$FAILED;
@@ -772,7 +779,7 @@ function peg$parse(input, options) {
     }
     if (s1 !== peg$FAILED) {
       peg$savedPos = s0;
-      s1 = peg$f9(s1);
+      s1 = peg$f8(s1);
     }
     s0 = s1;
 
@@ -845,16 +852,6 @@ function peg$parse(input, options) {
     }
 
     return s0;
-  }
-
-
-  function wrapAND(terms) {
-    if (terms.length === 1) return terms[0];
-    return { operator: "AND", conditions: terms };
-  }
-
-  function isWildcardPhrase(content) {
-    return content.includes("*");
   }
 
   peg$result = peg$startRuleFunction();
