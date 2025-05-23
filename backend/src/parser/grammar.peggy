@@ -31,7 +31,7 @@ Group
   = "(" _ expr:OrExpr _ ")" { return expr; }
 
 Not
-  = "-" _ t:(Word) {
+  = "-" _ t:(Word / Phrase) {
       return { type: "exclusion", value: t.value ?? t };
   }
 

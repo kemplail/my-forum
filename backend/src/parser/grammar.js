@@ -575,6 +575,9 @@ function peg$parse(input, options) {
     if (s1 !== peg$FAILED) {
       s2 = peg$parse_();
       s3 = peg$parseWord();
+      if (s3 === peg$FAILED) {
+        s3 = peg$parsePhrase();
+      }
       if (s3 !== peg$FAILED) {
         peg$savedPos = s0;
         s0 = peg$f5(s3);

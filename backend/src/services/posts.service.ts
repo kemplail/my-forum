@@ -19,16 +19,8 @@ import { HttpService } from '@nestjs/axios';
 import { lastValueFrom } from 'rxjs';
 import { AdvancedSearchDTO } from 'src/models/posts/dto/AdvancedSearchDTO';
 import { HybridSearchDTO } from 'src/models/posts/dto/HybridSearchDTO';
-import {
-  AtomicCondition,
-  LogicalCondition,
-  LogicalOperator,
-} from 'src/parser/types';
-import {
-  CompoundBasicOperator,
-  mongoSearchOperatorMap,
-  transformParsedQueryToMongoQuery,
-} from 'src/utils/parser.utils';
+import { LogicalCondition } from 'src/parser/types';
+import { transformParsedQueryToMongoQuery } from 'src/utils/parser.utils';
 import { parse } from 'src/parser/grammar';
 import { SyntaxError } from 'src/parser/grammar';
 
@@ -75,16 +67,26 @@ export class PostsService {
       operatorToApply: parsedQuery.operator,
     });
 
-    const res = await this.postModel.aggregate([
-      {
-        $search: mongoQuery,
-      },
-      {
-        $unset: 'vector',
-      },
-    ]);
+    return mongoQuery;
 
-    return res;
+    // const res = await this.postModel.aggregate([
+    //   {
+    //     $search: { ...mongoQuery, scoreDetails: true },
+    //   },
+    //   {
+    //     $unset: 'vector',
+    //   },
+    //   {
+    //     $project: {
+    //       score: { $meta: 'searchScore' },
+    //       text: 1,
+    //     },
+    //   },
+    // ]);
+
+    // console.log(res.length);
+
+    // return res;
   }
 
   async findAll({
