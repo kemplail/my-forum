@@ -7,122 +7,48 @@ import {
 
 const path = 'text';
 
-type PathQuery = {
+type BaseOperator = {
   path: string;
   query: string;
 };
 
-type TextOperator = { text: PathQuery };
-type PhraseOperator = { phrase: PathQuery & { slop?: number } };
+type TextOperator = { text: BaseOperator };
+type PhraseOperator = { phrase: BaseOperator & { slop?: number } };
 
-type ExclusionOperator = SinglePreciseCompound<'mustNot', TextOperator>;
+type ExclusionOperator = SinglePreciseCompoundOperation<
+  'mustNot',
+  TextOperator
+>;
 type AtomicOperator = TextOperator | PhraseOperator;
 
-type MongoSearchOperatorMap = Record<
-  AtomicConditionType,
-  (value: string) => AtomicOperator | ExclusionOperator
->;
+export type CompoundClause = 'should' | 'filter' | 'mustNot' | 'must';
 
-export type CompoundOperatorName = 'should' | 'filter' | 'mustNot' | 'must';
-
-const example: Compound = {
+// CompoundOperation avec une clause précise (must | mustNot | should | filter)
+type SingleCompoundOperation<OpName extends CompoundClause> = {
   compound: {
-    filter: [
-      {
-        compound: {
-          should: [
-            {
-              compound: {
-                should: [
-                  {
-                    text: {
-                      path: 'text',
-                      query: 'test',
-                    },
-                  },
-                  {
-                    text: {
-                      path: 'text',
-                      query: 'test',
-                    },
-                  },
-                ],
-              },
-            },
-            {
-              compound: {
-                filter: [
-                  {
-                    text: {
-                      path: 'text',
-                      query: 'test',
-                    },
-                  },
-                  {
-                    text: {
-                      path: 'text',
-                      query: 'test',
-                    },
-                  },
-                ],
-              },
-            },
-          ],
-        },
-      },
-      {
-        compound: {
-          mustNot: [
-            {
-              text: {
-                path: 'text',
-                query: 'test',
-              },
-            },
-          ],
-        },
-      },
-    ],
-  },
-};
-
-// Permet d'avoir :
-// {
-//   compound: {
-//     should: [...]
-//   }
-// }
-// OU
-// {
-//   compound: {
-//     filter: [...]
-//   }
-// }
-// ...
-type SingleCompound<Op extends CompoundOperatorName> = {
-  compound: {
-    [key in Op]: (AtomicOperator | Compound)[];
+    [key in OpName]: (AtomicOperator | CompoundOperation)[];
   } & {
-    [key in Exclude<CompoundOperatorName, Op>]?: never;
+    [key in Exclude<CompoundClause, OpName>]?: never;
   };
 };
 
-type SinglePreciseCompound<
-  Op extends CompoundOperatorName,
-  Elem extends AtomicOperator,
+// SingleCompoundOperation qui possède un seul opérateur précis
+type SinglePreciseCompoundOperation<
+  Clause extends CompoundClause,
+  Op extends AtomicOperator,
 > = {
   compound: {
-    [key in Op]: [Elem];
+    [key in Clause]: [Op];
   } & {
-    [key in Exclude<CompoundOperatorName, Op>]?: never;
+    [key in Exclude<CompoundClause, Clause>]?: never;
   };
 };
 
-export type Compound =
-  | SingleCompound<'filter'>
-  | SingleCompound<'should'>
-  | SingleCompound<'mustNot'>
-  | SingleCompound<'must'>;
+export type CompoundOperation =
+  | SingleCompoundOperation<'filter'>
+  | SingleCompoundOperation<'should'>
+  | SingleCompoundOperation<'mustNot'>
+  | SingleCompoundOperation<'must'>;
 
 // Retire les '*' et les espaces inutiles
 const sanitizeQuery = (value: string) =>
@@ -130,6 +56,11 @@ const sanitizeQuery = (value: string) =>
 
 // Map permettant de transformer une condition obtenue après le parsing en operateur mongo
 // Exemple : wildCardText devient un operateur phrase avec un slop à 3
+type MongoSearchOperatorMap = Record<
+  AtomicConditionType,
+  (value: string) => AtomicOperator | ExclusionOperator
+>;
+
 export const mongoSearchOperatorMap: MongoSearchOperatorMap = {
   text: (value) => ({
     text: {
@@ -172,9 +103,9 @@ export function transformParsedQueryToMongoQuery({
   conditions: (LogicalCondition | AtomicCondition)[];
   operatorToApply?: LogicalOperator;
   isTopLevel?: boolean;
-}): Compound {
+}): CompoundOperation {
   // Transforme les conditions :
-  // si la condition est atomique (pas d'imbrication) => on la transforme en opérateur mongo
+  // si la condition est atomique (pas d'imbrication) => on la transforme en opérateur mongo via la mongoSearchOperatorMap
   // sinon (la condition a des imbrications) => on appelle récursivement la fonction sur ses conditions imbriquées
   const transformedConditions = conditions.map((condition) =>
     'value' in condition
@@ -186,19 +117,19 @@ export function transformParsedQueryToMongoQuery({
         }),
   );
 
-  // Détermine l'opérateur de compound à utiliser
-  const operatorKey: CompoundOperatorName =
+  // Détermine la clause de compound à utiliser
+  const compoundClause: CompoundClause =
     operatorToApply === 'AND' ? 'filter' : 'should';
 
   const compound = {
     compound: {
-      [operatorKey]: transformedConditions,
+      [compoundClause]: transformedConditions,
     },
-  } as Compound;
+  } as CompoundOperation;
 
   // On encapsule un should avec un filter uniquement si ce should est au premier niveau,
   // sinon le should est déjà imbriqué dans un filter plus haut dans l'arborescence
-  if (isTopLevel && operatorKey === 'should') {
+  if (isTopLevel && compoundClause === 'should') {
     return {
       compound: {
         filter: [compound],
