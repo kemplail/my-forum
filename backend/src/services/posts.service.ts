@@ -65,24 +65,22 @@ export class PostsService {
       operatorToApply: parsedQuery.operator,
     });
 
-    return mongoQuery;
+    const res = await this.postModel.aggregate([
+      {
+        $search: { ...mongoQuery, scoreDetails: true },
+      },
+      {
+        $unset: 'vector',
+      },
+      {
+        $project: {
+          score: { $meta: 'searchScore' },
+          text: 1,
+        },
+      },
+    ]);
 
-    // const res = await this.postModel.aggregate([
-    //   {
-    //     $search: { ...mongoQuery, scoreDetails: true },
-    //   },
-    //   {
-    //     $unset: 'vector',
-    //   },
-    //   {
-    //     $project: {
-    //       score: { $meta: 'searchScore' },
-    //       text: 1,
-    //     },
-    //   },
-    // ]);
-
-    // return res;
+    return res;
   }
 
   async findAll({

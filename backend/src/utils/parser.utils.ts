@@ -1,7 +1,5 @@
 import {
   AtomicCondition,
-  SimpleCondition,
-  ExclusionCondition,
   LogicalCondition,
   LogicalOperator,
 } from 'src/parser/types';
@@ -16,11 +14,6 @@ type BaseOperator = {
 type TextOperator = { text: BaseOperator };
 type PhraseOperator = { phrase: BaseOperator & { slop?: number } };
 
-type ExclusionOperator = SinglePreciseCompoundOperation<
-  'mustNot',
-  TextOperator | PhraseOperator
->;
-
 type AtomicOperator = TextOperator | PhraseOperator;
 
 export type CompoundClause = 'should' | 'filter' | 'mustNot' | 'must';
@@ -31,18 +24,6 @@ type SingleCompoundOperation<OpName extends CompoundClause> = {
     [key in OpName]: (AtomicOperator | CompoundOperation)[];
   } & {
     [key in Exclude<CompoundClause, OpName>]?: never;
-  };
-};
-
-// SingleCompoundOperation qui possède un seul opérateur précis
-type SinglePreciseCompoundOperation<
-  Clause extends CompoundClause,
-  Op extends AtomicOperator,
-> = {
-  compound: {
-    [key in Clause]: [Op];
-  } & {
-    [key in Exclude<CompoundClause, Clause>]?: never;
   };
 };
 
@@ -86,20 +67,10 @@ export const mongoSimpleConditionMap: MongoSimpleConditionMap = {
   }),
 };
 
-export const transformAtomicCondition = (
-  condition: AtomicCondition,
-): ExclusionOperator | TextOperator | PhraseOperator => {
-  if (condition.type === 'exclusion') {
-    return {
-      compound: {
-        mustNot: [
-          mongoSimpleConditionMap[condition.value.type](condition.value.value),
-        ],
-      },
-    };
-  }
-
-  return mongoSimpleConditionMap[condition.type](condition.value);
+const logicalOperatorMap: Record<LogicalOperator, CompoundClause> = {
+  AND: 'filter',
+  OR: 'should',
+  NOT: 'mustNot',
 };
 
 export function transformParsedQueryToMongoQuery({
@@ -116,7 +87,7 @@ export function transformParsedQueryToMongoQuery({
   // sinon (la condition a des imbrications) => on appelle récursivement la fonction sur ses conditions imbriquées
   const transformedConditions = conditions.map((condition) => {
     if ('value' in condition) {
-      return transformAtomicCondition(condition);
+      return mongoSimpleConditionMap[condition.type](condition.value);
     } else {
       return transformParsedQueryToMongoQuery({
         conditions: condition.conditions,
@@ -127,8 +98,7 @@ export function transformParsedQueryToMongoQuery({
   });
 
   // Détermine la clause de compound à utiliser
-  const compoundClause: CompoundClause =
-    operatorToApply === 'AND' ? 'filter' : 'should';
+  const compoundClause: CompoundClause = logicalOperatorMap[operatorToApply];
 
   const compound = {
     compound: {

@@ -1,4 +1,4 @@
-export type LogicalOperator = 'AND' | 'OR';
+export type LogicalOperator = 'AND' | 'OR' | 'NOT';
 
 export type SimpleConditionType = 'text' | 'exactText' | 'wildCardText';
 export type SimpleCondition<

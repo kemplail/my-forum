@@ -38,12 +38,12 @@ Group
   = "(" _ expr:OrExpr _ ")" { return expr; }
 
 Not
-  = "-" _ t:(Word / Phrase) {
-      return { type: "exclusion", value: t };
+  = "-" _ t:(Group / Phrase / Word) {
+      return { operator: "NOT", conditions: [t] };
   }
 
 Phrase
-  = q:Quote parts:(WordPart (RequiredSpace WordPart)*) Quote {
+  = q:Quote _ parts:(WordPart (RequiredSpace WordPart)*) _ Quote {
   	  // Le premier mot est le premier élément de l'array
   	  const firstWord = parts[0]
 
@@ -52,10 +52,6 @@ Phrase
       
       const words = [firstWord, ...nextWords];
       const value = words.join(" ");
-
-      if (words.length === 1) {
-        return { type: "text", value: words[0] }
-      }
       
       if (words.includes("*")) {
         // Vérification : le * ne doit pas être en début ou fin
@@ -65,6 +61,10 @@ Phrase
 
         return { type: "wildCardText", value };
       } else {
+        if (words.length === 1) {
+          return { type: "text", value: words[0] }
+        }
+
         return { type: "exactText", value };
       }
   }

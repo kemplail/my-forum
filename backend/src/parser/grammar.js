@@ -195,6 +195,8 @@ function peg$parse(input, options) {
   const peg$e8 = peg$classExpectation([" "], false, false, false);
 
   function peg$f0(expr) {
+    // Si notre expression est une seule condition qui n'est pas une condition logique (AND ou OR), 
+    // on la wrap dans un AND
     if (!expr.conditions) {
       return { operator: "AND", conditions: [expr] }
     }
@@ -212,7 +214,7 @@ function peg$parse(input, options) {
   function peg$f3(t) {    return t;  }
   function peg$f4(expr) {    return expr;  }
   function peg$f5(t) {
-    return { type: "exclusion", value: t };
+    return { operator: "NOT", conditions: [t] };
   }
   function peg$f6(q, parts) {
     // Le premier mot est le premier élément de l'array
@@ -223,10 +225,6 @@ function peg$parse(input, options) {
       
       const words = [firstWord, ...nextWords];
       const value = words.join(" ");
-
-      if (words.length === 1) {
-        return { type: "text", value: words[0] }
-      }
       
       if (words.includes("*")) {
         // Vérification : le * ne doit pas être en début ou fin
@@ -236,6 +234,10 @@ function peg$parse(input, options) {
 
         return { type: "wildCardText", value };
       } else {
+        if (words.length === 1) {
+          return { type: "text", value: words[0] }
+        }
+
         return { type: "exactText", value };
       }
   }
@@ -588,9 +590,12 @@ function peg$parse(input, options) {
     }
     if (s1 !== peg$FAILED) {
       s2 = peg$parse_();
-      s3 = peg$parseWord();
+      s3 = peg$parseGroup();
       if (s3 === peg$FAILED) {
         s3 = peg$parsePhrase();
+        if (s3 === peg$FAILED) {
+          s3 = peg$parseWord();
+        }
       }
       if (s3 !== peg$FAILED) {
         peg$savedPos = s0;
@@ -608,59 +613,61 @@ function peg$parse(input, options) {
   }
 
   function peg$parsePhrase() {
-    let s0, s1, s2, s3, s4, s5, s6, s7;
+    let s0, s1, s2, s3, s4, s5, s6, s7, s8;
 
     s0 = peg$currPos;
     s1 = peg$parseQuote();
     if (s1 !== peg$FAILED) {
-      s2 = peg$currPos;
-      s3 = peg$parseWordPart();
-      if (s3 !== peg$FAILED) {
-        s4 = [];
-        s5 = peg$currPos;
-        s6 = peg$parseRequiredSpace();
-        if (s6 !== peg$FAILED) {
-          s7 = peg$parseWordPart();
-          if (s7 !== peg$FAILED) {
-            s6 = [s6, s7];
-            s5 = s6;
+      s2 = peg$parse_();
+      s3 = peg$currPos;
+      s4 = peg$parseWordPart();
+      if (s4 !== peg$FAILED) {
+        s5 = [];
+        s6 = peg$currPos;
+        s7 = peg$parseRequiredSpace();
+        if (s7 !== peg$FAILED) {
+          s8 = peg$parseWordPart();
+          if (s8 !== peg$FAILED) {
+            s7 = [s7, s8];
+            s6 = s7;
           } else {
-            peg$currPos = s5;
-            s5 = peg$FAILED;
+            peg$currPos = s6;
+            s6 = peg$FAILED;
           }
         } else {
-          peg$currPos = s5;
-          s5 = peg$FAILED;
+          peg$currPos = s6;
+          s6 = peg$FAILED;
         }
-        while (s5 !== peg$FAILED) {
-          s4.push(s5);
-          s5 = peg$currPos;
-          s6 = peg$parseRequiredSpace();
-          if (s6 !== peg$FAILED) {
-            s7 = peg$parseWordPart();
-            if (s7 !== peg$FAILED) {
-              s6 = [s6, s7];
-              s5 = s6;
+        while (s6 !== peg$FAILED) {
+          s5.push(s6);
+          s6 = peg$currPos;
+          s7 = peg$parseRequiredSpace();
+          if (s7 !== peg$FAILED) {
+            s8 = peg$parseWordPart();
+            if (s8 !== peg$FAILED) {
+              s7 = [s7, s8];
+              s6 = s7;
             } else {
-              peg$currPos = s5;
-              s5 = peg$FAILED;
+              peg$currPos = s6;
+              s6 = peg$FAILED;
             }
           } else {
-            peg$currPos = s5;
-            s5 = peg$FAILED;
+            peg$currPos = s6;
+            s6 = peg$FAILED;
           }
         }
-        s3 = [s3, s4];
-        s2 = s3;
+        s4 = [s4, s5];
+        s3 = s4;
       } else {
-        peg$currPos = s2;
-        s2 = peg$FAILED;
+        peg$currPos = s3;
+        s3 = peg$FAILED;
       }
-      if (s2 !== peg$FAILED) {
-        s3 = peg$parseQuote();
-        if (s3 !== peg$FAILED) {
+      if (s3 !== peg$FAILED) {
+        s4 = peg$parse_();
+        s5 = peg$parseQuote();
+        if (s5 !== peg$FAILED) {
           peg$savedPos = s0;
-          s0 = peg$f6(s1, s2);
+          s0 = peg$f6(s1, s3);
         } else {
           peg$currPos = s0;
           s0 = peg$FAILED;
