@@ -1,12 +1,23 @@
 
 {{
-  function wrapAND(terms) {
+  function wrapAND(terms, root) {
+    if (terms.length === 1) {
+      return terms[0];
+    }
     return { operator: "AND", conditions: terms };
   }
 }}
 
 Start
-  = _ expr:OrExpr _ { return expr ; }
+  = _ expr:OrExpr _ {
+    // Si notre expression est une seule condition qui n'est pas une condition logique (AND ou OR), 
+    // on la wrap dans un AND
+    if (!expr.conditions) {
+      return { operator: "AND", conditions: [expr] }
+    }
+
+    return expr;
+  }
 
 OrExpr
   = first:AndGroup rest:(_ OrKeyword _ AndGroup)* {
@@ -77,7 +88,7 @@ SimpleWord
   = chars:[a-zA-Z0-9éèàùçôîêâû_-]+ { return chars.join(""); }
 
 Quote
-  = "\""
+  = "\"" / "\“" / "\”"
 
 // 0,1,n répétitions d'un espace
 _ = [ ]*
