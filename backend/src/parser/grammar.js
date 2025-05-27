@@ -203,7 +203,7 @@ function peg$parse(input, options) {
   function peg$f3(t) {    return t;  }
   function peg$f4(expr) {    return expr;  }
   function peg$f5(t) {
-    return { type: "exclusion", value: t.value ?? t };
+    return { type: "exclusion", value: t };
   }
   function peg$f6(q, parts) {
     // Le premier mot est le premier élément de l'array
@@ -214,6 +214,10 @@ function peg$parse(input, options) {
       
       const words = [firstWord, ...nextWords];
       const value = words.join(" ");
+
+      if (words.length === 1) {
+        return { type: "text", value: words[0] }
+      }
       
       if (words.includes("*")) {
         // Vérification : le * ne doit pas être en début ou fin

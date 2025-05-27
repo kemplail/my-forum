@@ -6,7 +6,7 @@ import {
 import { InjectModel } from '@nestjs/mongoose';
 import { CreatePostDTO } from '../models/posts/dto/CreatePostDTO';
 import { UpdatePostDTO } from '../models/posts/dto/UpdatePostDTO';
-import { Model, PipelineStage } from 'mongoose';
+import { Model, mongo, PipelineStage } from 'mongoose';
 import {
   PaginatedPostWithLikes,
   Post,
@@ -65,22 +65,24 @@ export class PostsService {
       operatorToApply: parsedQuery.operator,
     });
 
-    const res = await this.postModel.aggregate([
-      {
-        $search: { ...mongoQuery, scoreDetails: true },
-      },
-      {
-        $unset: 'vector',
-      },
-      {
-        $project: {
-          score: { $meta: 'searchScore' },
-          text: 1,
-        },
-      },
-    ]);
+    return mongoQuery;
 
-    return res;
+    // const res = await this.postModel.aggregate([
+    //   {
+    //     $search: { ...mongoQuery, scoreDetails: true },
+    //   },
+    //   {
+    //     $unset: 'vector',
+    //   },
+    //   {
+    //     $project: {
+    //       score: { $meta: 'searchScore' },
+    //       text: 1,
+    //     },
+    //   },
+    // ]);
+
+    // return res;
   }
 
   async findAll({

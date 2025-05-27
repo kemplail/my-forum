@@ -28,7 +28,7 @@ Group
 
 Not
   = "-" _ t:(Word / Phrase) {
-      return { type: "exclusion", value: t.value ?? t };
+      return { type: "exclusion", value: t };
   }
 
 Phrase
@@ -41,6 +41,10 @@ Phrase
       
       const words = [firstWord, ...nextWords];
       const value = words.join(" ");
+
+      if (words.length === 1) {
+        return { type: "text", value: words[0] }
+      }
       
       if (words.includes("*")) {
         // Vérification : le * ne doit pas être en début ou fin

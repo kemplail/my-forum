@@ -1,6 +1,7 @@
 import {
   AtomicCondition,
-  AtomicConditionType,
+  SimpleCondition,
+  ExclusionCondition,
   LogicalCondition,
   LogicalOperator,
 } from 'src/parser/types';
@@ -17,8 +18,9 @@ type PhraseOperator = { phrase: BaseOperator & { slop?: number } };
 
 type ExclusionOperator = SinglePreciseCompoundOperation<
   'mustNot',
-  TextOperator
+  TextOperator | PhraseOperator
 >;
+
 type AtomicOperator = TextOperator | PhraseOperator;
 
 export type CompoundClause = 'should' | 'filter' | 'mustNot' | 'must';
@@ -54,14 +56,15 @@ export type CompoundOperation =
 const sanitizeQuery = (value: string) =>
   value.replace(/\*/g, '').replace(/\s+/g, ' ').trim();
 
-// Map permettant de transformer une condition obtenue après le parsing en operateur mongo
+// Map permettant de transformer une condition simple obtenue après le parsing en operateur mongo
 // Exemple : wildCardText devient un operateur phrase avec un slop à 3
-type MongoSearchOperatorMap = Record<
-  AtomicConditionType,
-  (value: string) => AtomicOperator | ExclusionOperator
->;
+type MongoSimpleConditionMap = {
+  text: (value: string) => TextOperator;
+  exactText: (value: string) => PhraseOperator;
+  wildCardText: (value: string) => PhraseOperator;
+};
 
-export const mongoSearchOperatorMap: MongoSearchOperatorMap = {
+export const mongoSimpleConditionMap: MongoSimpleConditionMap = {
   text: (value) => ({
     text: {
       path,
@@ -81,18 +84,22 @@ export const mongoSearchOperatorMap: MongoSearchOperatorMap = {
       query: sanitizeQuery(value),
     },
   }),
-  exclusion: (value) => ({
-    compound: {
-      mustNot: [
-        {
-          text: {
-            path,
-            query: value,
-          },
-        },
-      ],
-    },
-  }),
+};
+
+export const transformAtomicCondition = (
+  condition: AtomicCondition,
+): ExclusionOperator | TextOperator | PhraseOperator => {
+  if (condition.type === 'exclusion') {
+    return {
+      compound: {
+        mustNot: [
+          mongoSimpleConditionMap[condition.value.type](condition.value.value),
+        ],
+      },
+    };
+  }
+
+  return mongoSimpleConditionMap[condition.type](condition.value);
 };
 
 export function transformParsedQueryToMongoQuery({
@@ -107,15 +114,17 @@ export function transformParsedQueryToMongoQuery({
   // Transforme les conditions :
   // si la condition est atomique (pas d'imbrication) => on la transforme en opérateur mongo via la mongoSearchOperatorMap
   // sinon (la condition a des imbrications) => on appelle récursivement la fonction sur ses conditions imbriquées
-  const transformedConditions = conditions.map((condition) =>
-    'value' in condition
-      ? mongoSearchOperatorMap[condition.type](condition.value)
-      : transformParsedQueryToMongoQuery({
-          conditions: condition.conditions,
-          operatorToApply: condition.operator,
-          isTopLevel: false,
-        }),
-  );
+  const transformedConditions = conditions.map((condition) => {
+    if ('value' in condition) {
+      return transformAtomicCondition(condition);
+    } else {
+      return transformParsedQueryToMongoQuery({
+        conditions: condition.conditions,
+        operatorToApply: condition.operator,
+        isTopLevel: false,
+      });
+    }
+  });
 
   // Détermine la clause de compound à utiliser
   const compoundClause: CompoundClause =
