@@ -1,11 +1,7 @@
+
 {{
   function wrapAND(terms) {
-    if (terms.length === 1) return terms[0];
     return { operator: "AND", conditions: terms };
-  }
-
-  function isWildcardPhrase(content) {
-    return content.includes("*");
   }
 }}
 
@@ -39,6 +35,7 @@ Phrase
   = q:Quote parts:(WordPart (RequiredSpace WordPart)*) Quote {
   	  // Le premier mot est le premier élément de l'array
   	  const firstWord = parts[0]
+
       // Tous les autres mots sont dans une array qui est à l'index 1
       const nextWords = parts[1].map(pair => pair[1])
       
@@ -46,6 +43,11 @@ Phrase
       const value = words.join(" ");
       
       if (words.includes("*")) {
+        // Vérification : le * ne doit pas être en début ou fin
+        if (words[0] === "*" || words[words.length - 1] === "*") {
+          error('The character "*" cannot appear at the beginning or end of a sentence.');
+        }
+
         return { type: "wildCardText", value };
       } else {
         return { type: "exactText", value };

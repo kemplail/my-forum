@@ -54,9 +54,7 @@ export class PostsService {
       parsedQuery = parse(query);
     } catch (e) {
       if (e instanceof SyntaxError) {
-        throw new BadRequestException(
-          SyntaxError.buildMessage(e.expected, e.found),
-        );
+        throw new BadRequestException(e.message);
       }
 
       throw e;
