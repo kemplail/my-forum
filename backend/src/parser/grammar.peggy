@@ -1,6 +1,6 @@
 
 {{
-  function wrapAND(terms, root) {
+  function wrapAND(terms) {
     if (terms.length === 1) {
       return terms[0];
     }
