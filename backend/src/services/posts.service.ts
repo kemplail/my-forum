@@ -51,7 +51,7 @@ export class PostsService {
   async advancedSearch(query: string) {
     let parsedQuery: LogicalCondition;
     try {
-      parsedQuery = parse(query);
+      parsedQuery = parse(query, { depth: 0 });
     } catch (e) {
       if (e instanceof SyntaxError) {
         throw new BadRequestException(e.message);

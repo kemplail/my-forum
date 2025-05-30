@@ -28,10 +28,22 @@ Start
 
 OrExpr
   = first:AndGroup? rest:(_ OrKeyword _ AndGroup?)* {
-  	  if (!first) { return undefined }
-  	  // Si le premier groupe n'est pas suivi d'une expression OR
-      // OU l'expression OR n'est suivie de rien
-      if (rest.length === 0 || rest[3] === null) return first;
+      // il n'y a pas le premier AndGroup et pas de rest
+  	  if (!first && rest.length === 0) { return null }
+      
+      // il y a le premier AndGroup mais pas de rest (ex : bateau)
+      if (first && rest.length === 0) { return first; }
+      
+      // il y a le premier AndGroup et seulement un OR (ex : bateau OR)
+      if (first && rest.length === 1 && rest[0].length !== 0 && !rest[0][3]) {
+      	return first;
+      }
+      
+      // il n'y a pas le premier AndGroup mais un OR avec un AndGroup ensuite (ex : OR bateau)
+      if (!first && rest.length === 1 && rest[0].length !== 0 && rest[0][3]) {
+      	return rest[0][3];
+      }
+  	  
       return {
         operator: "OR",
         conditions: filterNullInArray([first, ...rest.map(r => r[3])])
@@ -44,10 +56,14 @@ AndGroup
 Term
   = _ t:(Group / Not / Phrase / Word / DanglingChars) _ { return t; }
 
-DanglingChars = DanglingOpenParenthesis / DanglingWildCard / DanglingQuote
+DanglingChars = DanglingOpenParenthesis / DanglingWildCard / DanglingQuote / MaybeDanglingCloseParenthesis
+
+MaybeDanglingCloseParenthesis = &{ return options.depth === 0; } DanglingCloseParenthesis { return null; }
 
 DanglingOpenParenthesis
   = "(" { return null; }
+  
+DanglingCloseParenthesis = ")" { return null; }
 
 DanglingWildCard = "*"
  { return null; }
@@ -55,8 +71,10 @@ DanglingWildCard = "*"
 DanglingQuote
   = Quote { return null; }
 
+OpenParenthesis = "(" { options.depth++; } 
+
 Group
-  = "(" _ expr:OrExpr _ ")" { return expr; }
+  = OpenParenthesis _ expr:OrExpr _ ")" { options.depth--; return expr; }
 
 Not
   = "-" _ t:(Group / Phrase / Word) {
@@ -64,7 +82,7 @@ Not
   }
 
 Phrase
-  = q:Quote _ parts:(SimpleWordWithWildCard (RequiredSpace SimpleWordWithWildCard)*) _ Quote {
+  = q:Quote _ parts:(SimpleWordWithWildCardAndParenthesis (RequiredSpace SimpleWordWithWildCardAndParenthesis)*) _ Quote {
   	  // Le premier mot est le premier élément de l'array
   	  const firstWord = parts[0]
 
@@ -102,8 +120,8 @@ Phrase
 
 // !OrKeyword : permet de vérifier que le mot n'est pas un orKeyword
 Word
-  = !OrKeyword w:SimpleWordWithWildCard { 
-  	 if (w.includes("*")) { 
+  = !OrKeyword w:SimpleWordWithWildCard {
+  	if (w.includes("*")) { 
         return null;
     }
 
@@ -119,6 +137,9 @@ OrKeyword
 // par défaut, renvoit chaque caractère comme élément d'une array
 SimpleWordWithWildCard
   = chars:[a-zA-Z0-9éèàùçôîêâû*_\.,;:?!'/@#&%+=~<>€£¥«»‹›\[\]\{\}\–—…•\^\$\|\\§±°©®™µ-]+ { return chars.join(""); }
+
+SimpleWordWithWildCardAndParenthesis
+  = chars:[a-zA-Z0-9éèàùçôîêâû*\)\(_\.,;:?!'/@#&%+=~<>€£¥«»‹›\[\]\{\}\–—…•\^\$\|\\§±°©®™µ-]+ { return chars.join(""); }
 
 Quote
   = "\"" / "\“" / "\”"
