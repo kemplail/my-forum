@@ -284,13 +284,13 @@ function peg$parse(input, options) {
       const phrase = cleanedWords.join(" ");
       
       if (cleanedWords.includes("*")) {
-        return { type: "wildCardText", phrase };
+        return { type: "wildCardText", value: phrase };
       } else {
         if (cleanedWords.length === 1) {
-          return { type: "text", phrase: cleanedWords[0] }
+          return { type: "text", value: phrase }
         }
 
-        return { type: "exactText", phrase };
+        return { type: "exactText", value: phrase };
       }
   }
   function peg$f14(word) {
