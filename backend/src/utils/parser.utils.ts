@@ -18,7 +18,7 @@ type AtomicOperator = TextOperator | PhraseOperator;
 
 export type CompoundClause = 'should' | 'filter' | 'mustNot' | 'must';
 
-// CompoundOperation avec une clause précise (must | mustNot | should | filter)
+// CompoundOperation avec possibilité de lui donner une clause précise (must | mustNot | should | filter)
 type SingleCompoundOperation<OpName extends CompoundClause> = {
   compound: {
     [key in OpName]: (AtomicOperator | CompoundOperation)[];
@@ -37,7 +37,7 @@ export type CompoundOperation =
 const sanitizeQuery = (value: string) =>
   value.replace(/\*/g, '').replace(/\s+/g, ' ').trim();
 
-// Map permettant de transformer une condition simple obtenue après le parsing en operateur mongo
+// Map permettant de transformer une condition atomique obtenue après le parsing en operateur mongo
 // Exemple : wildCardText devient un operateur phrase avec un slop à 3
 type MongoSimpleConditionMap = {
   text: (value: string) => TextOperator;
