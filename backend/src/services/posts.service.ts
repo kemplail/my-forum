@@ -21,8 +21,8 @@ import { AdvancedSearchDTO } from 'src/models/posts/dto/AdvancedSearchDTO';
 import { HybridSearchDTO } from 'src/models/posts/dto/HybridSearchDTO';
 import { LogicalCondition } from 'src/parser/types';
 import { transformParsedQueryToMongoQuery } from 'src/utils/parser.utils';
-import { parse } from 'src/parser/grammar';
-import { SyntaxError } from 'src/parser/grammar';
+import { parse } from 'src/parser/parser';
+import { SyntaxError } from 'src/parser/parser';
 
 const DEFAULT_PAGE_SIZE = 10;
 
@@ -60,14 +60,23 @@ export class PostsService {
       throw e;
     }
 
+    console.log('****** PARSED QUERY ******');
+    console.log(JSON.stringify(parsedQuery, null, 6));
+
     const mongoQuery = transformParsedQueryToMongoQuery({
       conditions: parsedQuery.conditions,
       operatorToApply: parsedQuery.operator,
     });
 
-    const res = await this.postModel.aggregate([
+    console.log('****** MONGO QUERY ******');
+    console.log(JSON.stringify(mongoQuery, null, 6));
+
+    const result = await this.postModel.aggregate([
       {
         $search: { ...mongoQuery, scoreDetails: true },
+      },
+      {
+        $limit: 10,
       },
       {
         $unset: 'vector',
@@ -80,7 +89,7 @@ export class PostsService {
       },
     ]);
 
-    return res;
+    return result;
   }
 
   async findAll({

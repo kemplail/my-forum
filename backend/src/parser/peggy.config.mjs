@@ -1,6 +1,6 @@
 export default {
-  input: 'grammar.peggy',
-  output: 'parser.js',
+  input: 'src/parser/grammar.peggy',
+  output: 'src/parser/parser.js',
   dts: true,
   returnTypes: {
     Start: 'LogicalCondition',

@@ -1,5 +1,4 @@
 import { LogicalCondition } from './types';
-
 /** Provides information pointing to a location within a source. */
 export interface Location {
   /** Line in the parsed source (1-based). */
