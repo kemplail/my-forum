@@ -31,8 +31,6 @@
   function filterNullInArray(items) {
   	return items.filter(t => t !== null && t !== undefined)
   }
-  
-  let depth = 0
 }}
 
 // une query est constituée d'une expression
@@ -90,7 +88,7 @@ DanglingChars = DanglingOpenParenthesis / DanglingQuote / MaybeDanglingClosePare
 // les parenthèses fermantes ne sont donc pas consommées par cette règle
 // si on n'est pas dans le contexte d'un groupe (depth === 0), cette règle est active.
 // chaque parenthèse fermante sera donc consommée par cette règle et retournée comme null
-MaybeDanglingCloseParenthesis = &{ return depth === 0; } DanglingCloseParenthesis
+MaybeDanglingCloseParenthesis = &{ return options.depth === 0; } DanglingCloseParenthesis
 { return null; }
 
 // caractères superflus
@@ -100,7 +98,7 @@ DanglingQuote = Quote
 
 // si on rencontre une parenthèse ouvrante, on entre dans le contexte d'un groupe
 // on augmente donc la profondeur de 1
-OpenParenthesis = "(" { depth++; } 
+OpenParenthesis = "(" { options.depth++; } 
 
 // un groupe est constituée d'une parenthèse ouvrante, d'une expression et d'une
 // parenthèse fermante
@@ -108,7 +106,7 @@ OpenParenthesis = "(" { depth++; }
 // contexte du groupe donc on diminue la profondeur de 1
 Group
   = OpenParenthesis _ expr:Expr _ ")" { 
-    depth--; 
+    options.depth--; 
     return expr; 
   }
 

@@ -37,8 +37,6 @@
   function filterNullInArray(items) {
   	return items.filter(t => t !== null && t !== undefined)
   }
-  
-  let depth = 0
 
 class peg$SyntaxError extends SyntaxError {
   constructor(message, expected, found, location) {
@@ -246,11 +244,11 @@ function peg$parse(input, options) {
   function peg$f4() {
     return null;
   }
-  function peg$f5() {    return depth === 0;  }
+  function peg$f5() {    return options.depth === 0;  }
   function peg$f6() {    return null;  }
-  function peg$f7() {    depth++;  }
+  function peg$f7() {    options.depth++;  }
   function peg$f8(expr) {    
-       depth--; 
+       options.depth--; 
        return expr; 
   }
   function peg$f9(notExpr) {
